@@ -15,7 +15,6 @@ import { getEventById, getRegistrationForUser } from '@/server/db/queries';
 import { getHall } from '@/server/db/halls';
 import {
   CATEGORY_GRADIENTS,
-  CATEGORY_STYLES,
   EVENT_STATUS_LABEL,
   type Category,
 } from '@/shared/constants';
@@ -46,12 +45,12 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
   const registration = user ? await getRegistrationForUser(event.id, user.id) : null;
   const waitlistStatus = await getWaitlistStatusForUser(event.id, user?.id ?? null);
   const hallSeats = event.layoutRows ? await getHall(event.id, user?.id ?? null) : [];
+  const mySeat = hallSeats.find((s) => s.status === 'mine');
 
   const seats = seatsInfo(event.maxSeats, event.occupiedSeats);
   const percent = fillPercent(event.maxSeats, event.occupiedSeats);
   const past = isPast(event.startDate);
   const gradient = CATEGORY_GRADIENTS[event.category as Category] ?? CATEGORY_GRADIENTS['Другое'];
-  const catStyle = CATEGORY_STYLES[event.category as Category] ?? CATEGORY_STYLES['Другое'];
   const isCancelled = event.status === 'cancelled';
 
   return (
@@ -209,9 +208,9 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
                       <CheckCircle2 className="h-4 w-4 text-emerald-600" />
                       Вы зарегистрированы
                     </div>
-                    {registration.rowLabel && registration.seatNumber !== null && (
+                    {mySeat && (
                       <p className="mt-1 text-xs font-bold text-emerald-900">
-                        Ряд {registration.rowLabel}, место {registration.seatNumber}
+                        Ряд {mySeat.rowLabel}, место {mySeat.number}
                       </p>
                     )}
                     <p className="mt-1 text-xs text-emerald-700/80 leading-relaxed">

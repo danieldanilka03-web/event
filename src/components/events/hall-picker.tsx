@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
-import { Clock, Armchair, ShieldCheck, Check } from 'lucide-react';
+import { Clock, ShieldCheck, Check } from 'lucide-react';
 import type { SeatView } from '@/server/db/halls';
 import { HOLD_TTL_MINUTES } from '@/shared/hall';
 import { holdSeatAction, registerForEventAction, releaseHoldAction } from '@/server/actions/registrations';

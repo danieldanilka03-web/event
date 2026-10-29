@@ -3,7 +3,7 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { CheckCircle2, Ticket, ArrowRight, LogIn } from 'lucide-react';
+import { CheckCircle2, Ticket, LogIn } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/toast';
 import { registerForEventAction } from '@/server/actions/registrations';

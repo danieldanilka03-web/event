@@ -3,7 +3,7 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { CalendarDays, MapPin, Ticket, Ban, Armchair, ArrowRight, Sparkles } from 'lucide-react';
+import { CalendarDays, MapPin, Ticket, Ban, Armchair, Sparkles } from 'lucide-react';
 import type { TicketRow } from '@/server/db/queries';
 import { formatEventDate, formatEventTime, isPast } from '@/shared/format';
 import { CATEGORY_GRADIENTS, CATEGORY_STYLES, type Category } from '@/shared/constants';

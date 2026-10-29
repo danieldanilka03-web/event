@@ -1,7 +1,6 @@
 'use client';
 
 import * as React from 'react';
-import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Eye, EyeOff, XCircle, Pencil, Users, Trash2, Clock } from 'lucide-react';
 import type { EventWithParticipants } from '@/server/db/queries';

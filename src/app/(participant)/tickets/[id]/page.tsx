@@ -6,8 +6,6 @@ import { requireUser } from '@/server/auth/guards';
 import { getTicketById } from '@/server/db/queries';
 import { formatEventDate, formatEventTime } from '@/shared/format';
 import { shortId } from '@/shared/utils';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
 import { getTicketQrDataUrl } from '@/components/tickets/qr';
 import { PrintButton } from '@/components/tickets/print-button';
 
