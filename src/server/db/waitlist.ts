@@ -18,7 +18,8 @@ export class WaitlistError extends Error {
   }
 }
 
-export type { WaitlistUserStatus } from '@/shared/waitlist';
+import type { WaitlistUserStatus } from '@/shared/waitlist';
+export type { WaitlistUserStatus };
 
 /**
  * Очищает истёкшие предложения (срок выкупа 30 минут прошёл).
