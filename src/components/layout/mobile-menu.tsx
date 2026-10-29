@@ -2,11 +2,12 @@
 
 import * as React from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { Menu } from 'lucide-react';
 import { Sheet } from '@/components/ui/dialog';
 import { logoutAction } from '@/server/actions/auth';
 import { ROLE_LABEL } from '@/shared/constants';
+import { cn } from '@/shared/utils';
 
 export function MobileMenu({
   user,
@@ -15,6 +16,7 @@ export function MobileMenu({
 }) {
   const [open, setOpen] = React.useState(false);
   const router = useRouter();
+  const pathname = usePathname();
 
   async function logout() {
     setOpen(false);
@@ -23,7 +25,14 @@ export function MobileMenu({
     router.refresh();
   }
 
-  const linkClass = 'block rounded-lg px-3 py-2 text-[15px] font-medium hover:bg-slate-100';
+  function isActive(href: string) {
+    if (href === '/') return pathname === '/';
+    if (href === '/admin') return pathname === '/admin';
+    if (href === '/organizer') return pathname === '/organizer';
+    return pathname === href || pathname.startsWith(`${href}/`);
+  }
+
+  const linkClass = 'block rounded-xl px-3.5 py-2.5 text-sm font-semibold transition-colors';
 
   return (
     <>
@@ -31,69 +40,167 @@ export function MobileMenu({
         type="button"
         aria-label="Открыть меню"
         onClick={() => setOpen(true)}
-        className="flex h-10 w-10 items-center justify-center rounded-xl hover:bg-slate-100"
+        className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white shadow-2xs hover:bg-slate-50 transition-colors"
       >
-        <Menu className="h-5 w-5" aria-hidden />
+        <Menu className="h-5 w-5 text-slate-700" aria-hidden />
       </button>
-      <Sheet open={open} onClose={() => setOpen(false)} title="Меню">
-        <nav className="flex flex-col gap-1" aria-label="Мобильная навигация">
-          <Link href="/" className={linkClass} onClick={() => setOpen(false)}>
+      <Sheet open={open} onClose={() => setOpen(false)} title="Навигация">
+        <nav className="flex flex-col gap-1 mt-2" aria-label="Мобильная навигация">
+          <Link
+            href="/"
+            className={cn(
+              linkClass,
+              isActive('/')
+                ? 'bg-indigo-50 text-indigo-700 font-bold border border-indigo-100'
+                : 'text-slate-700 hover:bg-slate-100',
+            )}
+            onClick={() => setOpen(false)}
+          >
             Мероприятия
           </Link>
+
           {user ? (
             <>
               {user.role === 'organizer' && (
                 <>
-                  <Link href="/organizer" className={`${linkClass} font-semibold text-blue-700 bg-blue-50/60`} onClick={() => setOpen(false)}>
+                  <Link
+                    href="/organizer"
+                    className={cn(
+                      linkClass,
+                      isActive('/organizer')
+                        ? 'bg-blue-100 text-blue-900 font-bold border border-blue-200'
+                        : 'text-slate-700 hover:bg-slate-100',
+                    )}
+                    onClick={() => setOpen(false)}
+                  >
                     Дашборд организатора
                   </Link>
-                  <Link href="/organizer/events" className={linkClass} onClick={() => setOpen(false)}>
+                  <Link
+                    href="/organizer/events"
+                    className={cn(
+                      linkClass,
+                      isActive('/organizer/events')
+                        ? 'bg-blue-100 text-blue-900 font-bold border border-blue-200'
+                        : 'text-slate-700 hover:bg-slate-100',
+                    )}
+                    onClick={() => setOpen(false)}
+                  >
                     Мои мероприятия
                   </Link>
-                  <Link href="/organizer/events/new" className={linkClass} onClick={() => setOpen(false)}>
+                  <Link
+                    href="/organizer/events/new"
+                    className={cn(
+                      linkClass,
+                      isActive('/organizer/events/new')
+                        ? 'bg-indigo-600 text-white font-bold'
+                        : 'text-indigo-700 hover:bg-indigo-50 font-semibold',
+                    )}
+                    onClick={() => setOpen(false)}
+                  >
                     + Создать событие
                   </Link>
                 </>
               )}
+
               {user.role === 'admin' && (
                 <>
-                  <Link href="/admin" className={`${linkClass} font-semibold text-purple-700 bg-purple-50/60`} onClick={() => setOpen(false)}>
+                  <Link
+                    href="/admin"
+                    className={cn(
+                      linkClass,
+                      isActive('/admin')
+                        ? 'bg-purple-100 text-purple-900 font-bold border border-purple-200'
+                        : 'text-slate-700 hover:bg-slate-100',
+                    )}
+                    onClick={() => setOpen(false)}
+                  >
                     Админ-панель
                   </Link>
-                  <Link href="/admin/events" className={linkClass} onClick={() => setOpen(false)}>
+                  <Link
+                    href="/admin/events"
+                    className={cn(
+                      linkClass,
+                      isActive('/admin/events')
+                        ? 'bg-purple-100 text-purple-900 font-bold border border-purple-200'
+                        : 'text-slate-700 hover:bg-slate-100',
+                    )}
+                    onClick={() => setOpen(false)}
+                  >
                     Модерация событий
                   </Link>
-                  <Link href="/admin/users" className={linkClass} onClick={() => setOpen(false)}>
+                  <Link
+                    href="/admin/users"
+                    className={cn(
+                      linkClass,
+                      isActive('/admin/users')
+                        ? 'bg-purple-100 text-purple-900 font-bold border border-purple-200'
+                        : 'text-slate-700 hover:bg-slate-100',
+                    )}
+                    onClick={() => setOpen(false)}
+                  >
                     Пользователи
                   </Link>
                 </>
               )}
+
               {user.role === 'participant' && (
-                <Link href="/my-tickets" className={linkClass} onClick={() => setOpen(false)}>
+                <Link
+                  href="/my-tickets"
+                  className={cn(
+                    linkClass,
+                    isActive('/my-tickets')
+                      ? 'bg-indigo-50 text-indigo-700 font-bold border border-indigo-100'
+                      : 'text-slate-700 hover:bg-slate-100',
+                  )}
+                  onClick={() => setOpen(false)}
+                >
                   Мои билеты
                 </Link>
               )}
-              <Link href="/profile" className={linkClass} onClick={() => setOpen(false)}>
+
+              <Link
+                href="/profile"
+                className={cn(
+                  linkClass,
+                  isActive('/profile')
+                    ? 'bg-slate-100 text-slate-900 font-bold'
+                    : 'text-slate-700 hover:bg-slate-100',
+                )}
+                onClick={() => setOpen(false)}
+              >
                 Профиль
               </Link>
-              <p className="px-3 pt-2 text-xs text-[var(--muted-fg)]">{ROLE_LABEL[user.role]}</p>
-              <button type="button" onClick={logout} className={`${linkClass} text-left text-[var(--danger)]`}>
-                Выйти
-              </button>
+
+              <div className="pt-3 mt-2 border-t border-slate-100">
+                <p className="px-3 text-xs text-slate-400 font-medium mb-1">
+                  Вы вошли как: {ROLE_LABEL[user.role]}
+                </p>
+                <button
+                  type="button"
+                  onClick={logout}
+                  className={`${linkClass} w-full text-left text-rose-600 hover:bg-rose-50`}
+                >
+                  Выйти из системы
+                </button>
+              </div>
             </>
           ) : (
-            <>
-              <Link href="/login" className={linkClass} onClick={() => setOpen(false)}>
+            <div className="pt-2 flex flex-col gap-2">
+              <Link
+                href="/login"
+                className="rounded-xl border border-slate-200 px-4 py-2.5 text-center text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                onClick={() => setOpen(false)}
+              >
                 Войти
               </Link>
               <Link
                 href="/register"
-                className="mt-1 rounded-xl bg-[var(--primary)] px-3 py-2 text-center text-[15px] font-medium text-white"
+                className="rounded-xl bg-indigo-600 px-4 py-2.5 text-center text-sm font-semibold text-white shadow-xs hover:bg-indigo-700"
                 onClick={() => setOpen(false)}
               >
                 Регистрация
               </Link>
-            </>
+            </div>
           )}
         </nav>
       </Sheet>

@@ -1,4 +1,8 @@
+'use client';
+
+import * as React from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { cn } from '@/shared/utils';
 
 export type SidebarItem = {
@@ -20,6 +24,15 @@ export function DashboardShell({
   children: React.ReactNode;
   actions?: React.ReactNode;
 }) {
+  const pathname = usePathname();
+
+  function isItemActive(href: string) {
+    if (href === '/admin' || href === '/organizer') {
+      return pathname === href;
+    }
+    return pathname === href || pathname.startsWith(`${href}/`);
+  }
+
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6">
       <div className="mb-6 flex flex-wrap items-start justify-between gap-4 border-b border-slate-200/80 pb-6">
@@ -32,20 +45,26 @@ export function DashboardShell({
 
       <div className="grid gap-8 md:grid-cols-[220px_1fr]">
         <nav aria-label="Разделы панели" className="md:sticky md:top-20 md:self-start">
-          <ul className="flex gap-1.5 overflow-x-auto md:flex-col md:overflow-visible p-1 rounded-2xl bg-slate-100/70 border border-slate-200/60">
-            {items.map((item) => (
-              <li key={item.href} className="shrink-0">
-                <Link
-                  href={item.href}
-                  className={cn(
-                    'flex items-center gap-2.5 whitespace-nowrap rounded-xl px-3.5 py-2 text-sm font-semibold text-slate-600 hover:bg-white hover:text-slate-900 hover:shadow-2xs transition-all',
-                  )}
-                >
-                  <span className="text-slate-400 group-hover:text-indigo-600">{item.icon}</span>
-                  {item.label}
-                </Link>
-              </li>
-            ))}
+          <ul className="flex gap-1.5 overflow-x-auto md:flex-col md:overflow-visible p-1.5 rounded-2xl bg-slate-100/70 border border-slate-200/60">
+            {items.map((item) => {
+              const active = isItemActive(item.href);
+              return (
+                <li key={item.href} className="shrink-0">
+                  <Link
+                    href={item.href}
+                    className={cn(
+                      'flex items-center gap-2.5 whitespace-nowrap rounded-xl px-3.5 py-2.5 text-sm font-semibold transition-all',
+                      active
+                        ? 'bg-white text-indigo-700 font-bold shadow-xs border border-slate-200/80'
+                        : 'text-slate-600 hover:bg-white/80 hover:text-slate-900',
+                    )}
+                  >
+                    <span className={active ? 'text-indigo-600' : 'text-slate-400'}>{item.icon}</span>
+                    {item.label}
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
         </nav>
 
