@@ -1,13 +1,11 @@
-import { and, asc, count, desc, eq, gt, inArray, lt, lte, or, sql } from 'drizzle-orm';
+import { and, asc, count, eq, gt, lt, or, sql } from 'drizzle-orm';
 import { db, getPool } from '@/server/db';
 import {
   events,
   registrations,
-  seatHolds,
   seats,
   users,
   waitlist,
-  type WaitlistRow,
   type WaitlistStatus,
 } from '@/server/db/schema';
 

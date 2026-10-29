@@ -3,7 +3,7 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Sparkles, Clock, ArrowRight, Ban, CheckCircle } from 'lucide-react';
+import { Sparkles, Clock, Ban, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/toast';
 import { ConfirmDialog } from '@/components/ui/dialog';

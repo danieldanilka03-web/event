@@ -1,14 +1,8 @@
 'use client';
 
 import * as React from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
-  Clock,
-  Sparkles,
-  Users,
-  CheckCircle,
-  AlertTriangle,
   Play,
   ArrowUpDown,
   Trash2,
@@ -18,7 +12,7 @@ import {
   Timer,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { Button, ButtonLink } from '@/components/ui/button';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Table, THead, TH, TR, TD } from '@/components/ui/table';
 import { ConfirmDialog, EmptyState, Tabs } from '@/components/ui/dialog';
@@ -353,7 +347,7 @@ export function WaitlistClient({
               if (res.data.dispatched) {
                 toast('Кандидат выбран, место предложено на 30 минут', 'success');
               } else {
-                toast('В очереди нет ожидающих участников', 'warning');
+                toast('В очереди нет ожидающих участников', 'danger');
               }
               router.refresh();
             } else {
