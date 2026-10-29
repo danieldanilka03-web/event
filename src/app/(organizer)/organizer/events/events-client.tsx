@@ -36,18 +36,28 @@ function StatusForm({ eventId, status }: { eventId: string; status: EventStatusI
       <Button
         variant="outline"
         size="sm"
+        className="h-8 px-2.5 text-xs font-medium"
         disabled={isPending}
         onClick={() => submit('draft')}
+        title="Снять с публикации (вернуть в черновик)"
         aria-label="Снять с публикации"
       >
-        <EyeOff className="h-4 w-4" aria-hidden /> {isPending ? '…' : 'Снять с публикации'}
+        <EyeOff className="h-3.5 w-3.5 text-amber-600" aria-hidden /> {isPending ? '…' : 'В черновик'}
       </Button>
     );
   }
 
   return (
-    <Button variant="outline" size="sm" disabled={isPending} onClick={() => submit('published')}>
-      <Eye className="h-4 w-4" aria-hidden /> {isPending ? '…' : 'Опубликовать'}
+    <Button
+      variant="outline"
+      size="sm"
+      className="h-8 px-2.5 text-xs font-medium text-emerald-700 hover:text-emerald-800 hover:bg-emerald-50 border-emerald-200"
+      disabled={isPending}
+      onClick={() => submit('published')}
+      title="Опубликовать мероприятие"
+      aria-label="Опубликовать мероприятие"
+    >
+      <Eye className="h-3.5 w-3.5 text-emerald-600" aria-hidden /> {isPending ? '…' : 'Опубликовать'}
     </Button>
   );
 }
@@ -62,8 +72,15 @@ function CancelEventButton({ event }: { event: EventWithParticipants }) {
 
   return (
     <>
-      <Button variant="ghost" size="sm" onClick={() => setOpen(true)} aria-label="Отменить мероприятие">
-        <XCircle className="h-4 w-4" aria-hidden /> Отменить
+      <Button
+        variant="ghost"
+        size="sm"
+        className="h-8 px-2 text-xs text-[var(--muted-fg)] hover:text-amber-700 hover:bg-amber-50"
+        onClick={() => setOpen(true)}
+        title="Отменить мероприятие"
+        aria-label="Отменить мероприятие"
+      >
+        <XCircle className="h-3.5 w-3.5" aria-hidden /> Отменить
       </Button>
       <ConfirmDialog
         open={open}
@@ -99,12 +116,13 @@ function DeleteEventButton({ event, participants }: { event: EventWithParticipan
     <>
       <Button
         variant="ghost"
-        size="sm"
-        className="text-[var(--danger)]"
+        size="icon"
+        className="h-8 w-8 text-[var(--danger)] hover:bg-red-50"
         onClick={() => setOpen(true)}
+        title="Удалить мероприятие"
         aria-label="Удалить мероприятие"
       >
-        <Trash2 className="h-4 w-4" aria-hidden /> Удалить
+        <Trash2 className="h-3.5 w-3.5" aria-hidden />
       </Button>
 
       <ConfirmDialog
@@ -181,14 +199,14 @@ export function OrganizerEventsClient({ events }: { events: EventWithParticipant
 
   return (
     <>
-      <div className="rounded-xl border border-[var(--border-ui)] bg-white">
-        <Table>
+      <div className="overflow-hidden rounded-xl border border-[var(--border-ui)] bg-white shadow-2xs">
+        <Table className="min-w-[960px]">
           <THead>
-            <TH>Название</TH>
-            <TH>Дата</TH>
-            <TH>Статус</TH>
-            <TH>Заполняемость</TH>
-            <TH aria-label="Действия" />
+            <TH className="w-[280px]">Название</TH>
+            <TH className="w-[150px]">Дата</TH>
+            <TH className="w-[120px]">Статус</TH>
+            <TH className="w-[140px]">Заполняемость</TH>
+            <TH className="text-right">Действия</TH>
           </THead>
           <tbody>
             {events.map((event) => {
@@ -196,7 +214,7 @@ export function OrganizerEventsClient({ events }: { events: EventWithParticipant
               const activeParticipants = event.activeParticipants;
               return (
                 <TR key={event.id}>
-                  <TD className="max-w-[240px]">
+                  <TD className="max-w-[280px]">
                     <p className="truncate font-medium">{event.title}</p>
                     <p className="truncate text-sm text-[var(--muted-fg)]">{event.location}</p>
                   </TD>
@@ -208,7 +226,7 @@ export function OrganizerEventsClient({ events }: { events: EventWithParticipant
                       </Badge>
                     )}
                   </TD>
-                  <TD>
+                  <TD className="whitespace-nowrap">
                     <Badge
                       tone={
                         event.status === 'published'
@@ -225,38 +243,48 @@ export function OrganizerEventsClient({ events }: { events: EventWithParticipant
                           : 'Черновик'}
                     </Badge>
                   </TD>
-                  <TD className="min-w-[150px]">
+                  <TD className="whitespace-nowrap">
                     <div className="flex items-center gap-2">
-                      <div className="w-20">
+                      <div className="w-16">
                         <Progress value={percent} />
                       </div>
-                      <span className="whitespace-nowrap text-sm text-[var(--muted-fg)]">
+                      <span className="whitespace-nowrap text-xs text-[var(--muted-fg)]">
                         {event.occupiedSeats}/{event.maxSeats}
                       </span>
                     </div>
                   </TD>
-                  <TD>
-                    <div className="flex flex-wrap justify-end gap-1">
-                      <Link
+                  <TD className="whitespace-nowrap text-right">
+                    <div className="inline-flex items-center justify-end gap-1.5">
+                      <ButtonLink
                         href={`/organizer/events/${event.id}/participants`}
-                        className="inline-flex items-center gap-1 rounded-lg px-2 py-1.5 text-sm font-medium hover:bg-slate-100"
+                        variant="outline"
+                        size="sm"
+                        className="h-8 px-2.5 text-xs font-medium"
+                        title="Список участников"
                       >
-                        <Users className="h-4 w-4" aria-hidden /> Участники
-                      </Link>
-                      <Link
+                        <Users className="h-3.5 w-3.5 text-[var(--muted-fg)]" aria-hidden />
+                        Участники
+                      </ButtonLink>
+                      <ButtonLink
                         href={`/organizer/events/${event.id}/waitlist`}
-                        className="inline-flex items-center gap-1 rounded-lg px-2 py-1.5 text-sm font-medium hover:bg-slate-100"
+                        variant="outline"
+                        size="sm"
+                        className="h-8 px-2.5 text-xs font-medium"
                         title="Лист ожидания"
                       >
-                        <Clock className="h-4 w-4" aria-hidden /> Очередь
-                      </Link>
-                      <Link
+                        <Clock className="h-3.5 w-3.5 text-[var(--muted-fg)]" aria-hidden />
+                        Очередь
+                      </ButtonLink>
+                      <ButtonLink
                         href={`/organizer/events/${event.id}/edit`}
-                        className="inline-flex items-center gap-1 rounded-lg px-2 py-1.5 text-sm font-medium hover:bg-slate-100"
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-[var(--muted-fg)] hover:text-[var(--foreground)]"
+                        title="Редактировать мероприятие"
                         aria-label="Редактировать мероприятие"
                       >
-                        <Pencil className="h-4 w-4" aria-hidden />
-                      </Link>
+                        <Pencil className="h-3.5 w-3.5" aria-hidden />
+                      </ButtonLink>
                       <StatusForm eventId={event.id} status={event.status} />
                       <CancelEventButton event={event} />
                       <DeleteEventButton event={event} participants={activeParticipants} />

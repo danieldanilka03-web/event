@@ -123,8 +123,8 @@ export function AdminEventsClient({ events }: { events: Row[] }) {
                   : 'Черновик'}
             </Badge>
           </td>
-          <td>
-            <div className="flex flex-wrap items-center gap-2">
+          <td className="whitespace-nowrap px-4 py-3 text-right">
+            <div className="inline-flex items-center justify-end gap-2">
               <StatusForm event={event} />
               <DeleteButton event={event} />
             </div>

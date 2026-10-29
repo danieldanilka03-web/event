@@ -56,8 +56,8 @@ export default async function ParticipantsPage({ params }: { params: Promise<{ i
       {participants.length === 0 ? (
         <EmptyState title="Ничего не найдено" description="На это мероприятие пока никто не записался." />
       ) : (
-        <div className="rounded-xl border border-[var(--border-ui)] bg-white">
-          <Table>
+        <div className="overflow-hidden rounded-xl border border-[var(--border-ui)] bg-white shadow-2xs">
+          <Table className="min-w-[760px]">
             <THead>
               <TH>Участник</TH>
               <TH>Email</TH>

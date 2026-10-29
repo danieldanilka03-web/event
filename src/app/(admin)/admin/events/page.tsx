@@ -31,8 +31,8 @@ export default async function AdminEventsPage({
         <EmptyState title="Ничего не найдено" description="Мероприятий пока нет." />
       ) : (
         <>
-          <div className="rounded-xl border border-[var(--border-ui)] bg-white">
-            <Table>
+          <div className="overflow-hidden rounded-xl border border-[var(--border-ui)] bg-white shadow-2xs">
+            <Table className="min-w-[920px]">
               <THead>
                 <TH>Мероприятие</TH>
                 <TH>Организатор</TH>

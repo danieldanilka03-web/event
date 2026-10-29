@@ -220,8 +220,8 @@ export function WaitlistClient({
           }
         />
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-[var(--border-ui)] bg-white">
-          <Table>
+        <div className="overflow-hidden rounded-xl border border-[var(--border-ui)] bg-white shadow-2xs">
+          <Table className="min-w-[880px]">
             <THead>
               <TH>#</TH>
               <TH>Участник</TH>
