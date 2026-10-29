@@ -12,7 +12,7 @@ import {
   Clock,
 } from 'lucide-react';
 import { getCurrentUser } from '@/server/auth/session';
-import { getEventById, getRegistrationForUser } from '@/server/db/queries';
+import { getEventById, getUserRegistrationsForEvent } from '@/server/db/queries';
 import { getHall } from '@/server/db/halls';
 import {
   CATEGORY_GRADIENTS,
@@ -43,10 +43,10 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
   const event = await getEventById(id);
   if (!event) notFound();
 
-  const registration = user ? await getRegistrationForUser(event.id, user.id) : null;
+  const userRegistrations = user ? await getUserRegistrationsForEvent(event.id, user.id) : [];
+  const activeRegistrations = userRegistrations.filter((r) => r.status === 'active');
   const waitlistStatus = await getWaitlistStatusForUser(event.id, user?.id ?? null);
   const hallSeats = event.layoutRows ? await getHall(event.id, user?.id ?? null) : [];
-  const mySeat = hallSeats.find((s) => s.status === 'mine');
 
   const seats = seatsInfo(event.maxSeats, event.occupiedSeats);
   const percent = fillPercent(event.maxSeats, event.occupiedSeats);
@@ -157,7 +157,6 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
                 eventId={event.id}
                 seats={hallSeats}
                 isAuthenticated={Boolean(user)}
-                isRegistered={registration?.status === 'active'}
                 isPast={past}
                 isUnavailable={isCancelled || event.status !== 'published'}
               />
@@ -221,23 +220,18 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
 
               {/* Блок действия / Статус регистрации */}
               <div className="pt-2">
-                {registration?.status === 'active' ? (
-                  /* Карточка успешной регистрации */
+                {activeRegistrations.length > 0 && !event.layoutRows && seats.free <= 0 ? (
+                  /* Карточка успешной регистрации при солдауте */
                   <div className="rounded-2xl border border-emerald-200/90 bg-emerald-50/80 p-4 text-center">
                     <div className="inline-flex items-center justify-center gap-1.5 font-bold text-emerald-900 text-sm">
                       <CheckCircle2 className="h-4 w-4 text-emerald-600" />
-                      Вы зарегистрированы
+                      Вы зарегистрированы ({activeRegistrations.length} шт.)
                     </div>
-                    {mySeat && (
-                      <p className="mt-1 text-xs font-black text-emerald-950">
-                        Ряд {mySeat.rowLabel}, место {mySeat.number}
-                      </p>
-                    )}
                     <p className="mt-1 text-xs text-emerald-700/90 leading-relaxed font-medium">
-                      Электронный билет сохранён в личном кабинете.
+                      Электронные билеты сохранены в личном кабинете.
                     </p>
                     <ButtonLink
-                      href={`/tickets/${registration.id}`}
+                      href={`/tickets/${activeRegistrations[0].id}`}
                       size="md"
                       className="mt-3.5 w-full bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm font-bold"
                     >
@@ -246,7 +240,7 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
                     </ButtonLink>
                     <p className="mt-2.5 text-center text-xs text-slate-500 font-semibold">
                       <Link href="/my-tickets" className="hover:text-slate-900 hover:underline">
-                        Все мои билеты →
+                        Все мои билеты ({activeRegistrations.length}) →
                       </Link>
                     </p>
                   </div>
@@ -265,9 +259,9 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
                 ) : !event.layoutRows ? (
                   <RegisterButton
                     eventId={event.id}
-                    registrationId={registration?.id ?? null}
-                    isRegistered={false}
-                    isCancelledRegistration={registration?.status === 'cancelled'}
+                    registrationId={activeRegistrations[0]?.id ?? null}
+                    isRegistered={activeRegistrations.length > 0}
+                    isCancelledRegistration={userRegistrations.some((r) => r.status === 'cancelled')}
                     isAuthenticated={Boolean(user)}
                     isPast={past}
                     isCancelled={isCancelled}
@@ -275,8 +269,37 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
                     seatsLeft={seats.free}
                   />
                 ) : (
-                  <div className="rounded-2xl border border-indigo-200 bg-indigo-50/80 p-4 text-center text-xs font-bold text-indigo-900 leading-relaxed">
-                    👉 Выберите желаемое место на схеме зала слева
+                  <div className="space-y-3">
+                    {activeRegistrations.length > 0 && (
+                      <div className="rounded-2xl border border-emerald-200/90 bg-emerald-50/80 p-4 text-center">
+                        <div className="inline-flex items-center justify-center gap-1.5 font-bold text-emerald-900 text-sm">
+                          <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                          Оформлено мест: {activeRegistrations.length}
+                        </div>
+                        <p className="mt-1 text-xs font-black text-emerald-950">
+                          {activeRegistrations
+                            .filter((r) => r.rowLabel && r.seatNumber)
+                            .map((r) => `Ряд ${r.rowLabel}, м.${r.seatNumber}`)
+                            .join(' · ')}
+                        </p>
+                        <ButtonLink
+                          href={`/tickets/${activeRegistrations[0].id}`}
+                          size="sm"
+                          className="mt-3 w-full bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs font-bold"
+                        >
+                          <Ticket className="h-4 w-4 mr-1.5" />
+                          Открыть билет
+                        </ButtonLink>
+                        <p className="mt-2 text-center text-xs text-slate-500 font-semibold">
+                          <Link href="/my-tickets" className="hover:text-slate-900 hover:underline">
+                            Все мои билеты ({activeRegistrations.length}) →
+                          </Link>
+                        </p>
+                      </div>
+                    )}
+                    <div className="rounded-2xl border border-indigo-200 bg-indigo-50/80 p-4 text-center text-xs font-bold text-indigo-900 leading-relaxed">
+                      👉 Выберите желаемые места на схеме зала слева (до 5 мест)
+                    </div>
                   </div>
                 )}
               </div>

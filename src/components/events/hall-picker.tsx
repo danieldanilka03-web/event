@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
-import { Clock, ShieldCheck, Check } from 'lucide-react';
+import { Clock, ShieldCheck, Check, X, Armchair } from 'lucide-react';
 import type { SeatView } from '@/server/db/halls';
 import { HOLD_TTL_MINUTES } from '@/shared/hall';
 import { holdSeatAction, registerForEventAction, releaseHoldAction } from '@/server/actions/registrations';
@@ -38,57 +38,68 @@ function formatRemaining(ms: number): string {
   return `${m}:${String(s).padStart(2, '0')}`;
 }
 
+function pluralSeats(count: number): string {
+  const mod10 = count % 10;
+  const mod100 = count % 100;
+  if (mod100 >= 11 && mod100 <= 19) return `${count} мест`;
+  if (mod10 === 1) return `${count} место`;
+  if (mod10 >= 2 && mod10 <= 4) return `${count} места`;
+  return `${count} мест`;
+}
+
+function pluralTickets(count: number): string {
+  const mod10 = count % 10;
+  const mod100 = count % 100;
+  if (mod100 >= 11 && mod100 <= 19) return `${count} билетов`;
+  if (mod10 === 1) return `${count} билет`;
+  if (mod10 >= 2 && mod10 <= 4) return `${count} билета`;
+  return `${count} билетов`;
+}
+
 export function HallPicker({
   eventId,
   seats,
   isAuthenticated,
-  isRegistered,
   isPast,
   isUnavailable,
 }: {
   eventId: string;
   seats: SeatView[];
   isAuthenticated: boolean;
-  isRegistered: boolean;
+  isRegistered?: boolean;
   isPast: boolean;
   isUnavailable: boolean;
 }) {
   const router = useRouter();
   const toast = useToast();
 
-  const initialMineSeat = React.useMemo(() => seats.find((s) => s.status === 'mine'), [seats]);
-  const [selected, setSelected] = React.useState<string | null>(() => initialMineSeat?.id ?? null);
-  const [expiresAt, setExpiresAt] = React.useState<number | null>(() =>
-    initialMineSeat?.holdExpiresAt ? new Date(initialMineSeat.holdExpiresAt).getTime() : null,
-  );
+  const mineSeats = React.useMemo(() => seats.filter((s) => s.status === 'mine'), [seats]);
   const [now, setNow] = React.useState<number>(() => Date.now());
   const [busy, setBusy] = React.useState(false);
 
-  React.useEffect(() => {
-    if (initialMineSeat && !selected) {
-      setSelected(initialMineSeat.id);
-      if (initialMineSeat.holdExpiresAt) {
-        setExpiresAt(new Date(initialMineSeat.holdExpiresAt).getTime());
-      }
-    }
-  }, [initialMineSeat, selected]);
+  // Вычисляем ближайшее время окончания брони среди выбранных мест
+  const earliestExpiry = React.useMemo(() => {
+    if (mineSeats.length === 0) return null;
+    const timestamps = mineSeats
+      .map((s) => (s.holdExpiresAt ? new Date(s.holdExpiresAt).getTime() : null))
+      .filter((t): t is number => t !== null);
+    return timestamps.length > 0 ? Math.min(...timestamps) : null;
+  }, [mineSeats]);
 
   const disabled = isPast || isUnavailable;
 
   React.useEffect(() => {
-    if (!expiresAt) return;
+    if (!earliestExpiry) return;
     const timer = window.setInterval(() => {
       const current = Date.now();
       setNow(current);
-      if (current >= expiresAt) {
-        setExpiresAt(null);
-        setSelected(null);
-        toast('Время брони истекло, место снова свободно', 'danger');
+      if (current >= earliestExpiry) {
+        toast('Время брони части мест истекло', 'danger');
         router.refresh();
       }
     }, 1000);
     return () => window.clearInterval(timer);
-  }, [expiresAt, router, toast]);
+  }, [earliestExpiry, router, toast]);
 
   const rowsMap = new Map<string, SeatView[]>();
   for (const seat of seats) {
@@ -111,8 +122,13 @@ export function HallPicker({
       return;
     }
 
-    if (isRegistered) {
-      toast('Вы уже зарегистрированы на это мероприятие', 'warning');
+    // Если место уже забронировано мной — повторный клик снимает с него бронь (toggle off)
+    if (seat.status === 'mine') {
+      setBusy(true);
+      await releaseHoldAction(null, { eventId, seatId: seat.id });
+      setBusy(false);
+      toast(`Место ${seat.rowLabel}-${seat.number} убрано из заказа`);
+      router.refresh();
       return;
     }
 
@@ -121,12 +137,15 @@ export function HallPicker({
       return;
     }
 
-    if (seat.status === 'held' && seat.id !== selected) {
+    if (seat.status === 'held') {
       toast('Место временно забронировано другим участником', 'warning');
       return;
     }
 
-    if (seat.id === selected) return;
+    if (mineSeats.length >= 5) {
+      toast('Вы можете выбрать максимум 5 мест в одном заказе', 'warning');
+      return;
+    }
 
     setBusy(true);
     const result = await holdSeatAction(null, { eventId, seatId: seat.id });
@@ -138,87 +157,101 @@ export function HallPicker({
       return;
     }
 
-    setSelected(seat.id);
-    setExpiresAt(new Date(result.data.expiresAt).getTime());
     toast(`Место ${seat.rowLabel}-${seat.number} забронировано на ${HOLD_TTL_MINUTES} минут`);
     router.refresh();
   }
 
-  async function confirm(seat: SeatView) {
+  async function confirmAll() {
+    if (mineSeats.length === 0) return;
     setBusy(true);
-    const result = await registerForEventAction(null, { eventId, seatId: seat.id });
+    const seatIds = mineSeats.map((s) => s.id);
+    const result = await registerForEventAction(null, { eventId, seatIds });
     setBusy(false);
     if (!result.ok) {
       toast(result.error, 'danger');
-      setSelected(null);
-      setExpiresAt(null);
       router.refresh();
       return;
     }
-    toast(`Место ${seat.rowLabel}-${seat.number} забронировано за вами!`);
-    setSelected(null);
-    setExpiresAt(null);
+    toast(`Успешно оформлено: ${pluralTickets(mineSeats.length)}!`);
     router.push(`/tickets/${result.data.registrationId}`);
     router.refresh();
   }
 
-  async function release() {
+  async function releaseAll() {
     setBusy(true);
     await releaseHoldAction(null, { eventId });
     setBusy(false);
-    setSelected(null);
-    setExpiresAt(null);
-    toast('Бронь снята');
+    toast('Все выбранные места освобождены');
     router.refresh();
   }
 
-  const selectedSeat = seats.find((s) => s.id === selected) ?? null;
-  const remaining = expiresAt ? expiresAt - now : 0;
+  const remaining = earliestExpiry ? earliestExpiry - now : 0;
 
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-          Схема зрительного зала
+          Схема зрительного зала (выберите до 5 мест)
         </p>
         <Legend />
       </div>
 
-      {expiresAt && selectedSeat && (
+      {mineSeats.length > 0 && earliestExpiry && (
         <div
           className={cn(
-            'flex flex-wrap items-center justify-between gap-3 rounded-2xl border p-3.5 shadow-xs transition-colors',
+            'flex flex-wrap items-center justify-between gap-4 rounded-3xl border p-4 shadow-md transition-all animate-in fade-in zoom-in-95 duration-200',
             remaining < 60000
-              ? 'border-rose-300 bg-rose-50 text-rose-900'
-              : 'border-amber-300 bg-amber-50/90 text-amber-950',
+              ? 'border-rose-300 bg-rose-50 text-rose-900 shadow-rose-100'
+              : 'border-indigo-200/90 bg-indigo-50/90 text-indigo-950 shadow-indigo-100/50',
           )}
           role="status"
         >
-          <div className="flex items-center gap-2.5">
-            <Clock
-              className={cn('h-5 w-5 shrink-0', remaining < 60000 ? 'text-rose-600' : 'text-amber-600')}
-              aria-hidden
-            />
-            <p className="text-sm">
-              Выбрано: <strong>Ряд {selectedSeat.rowLabel}, место {selectedSeat.number}</strong>. Бронь держится{' '}
-              <strong className="tabular-nums font-mono text-base font-bold underline decoration-amber-400">
-                {formatRemaining(remaining)}
-              </strong>
-            </p>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+            <div className="flex items-center gap-2">
+              <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-indigo-600 text-white font-bold text-xs shadow-xs">
+                {mineSeats.length}
+              </span>
+              <div>
+                <p className="text-sm font-bold leading-tight">
+                  Выбрано: {pluralSeats(mineSeats.length)}
+                </p>
+                <p className="text-xs text-slate-600 leading-tight mt-0.5">
+                  {mineSeats.map((s) => `Ряд ${s.rowLabel}, м.${s.number}`).join(' · ')}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-1.5 text-xs font-semibold text-amber-800 bg-amber-100/90 px-2.5 py-1 rounded-xl border border-amber-200">
+              <Clock className="h-3.5 w-3.5 text-amber-700" aria-hidden />
+              <span>
+                Бронь:{' '}
+                <strong className="font-mono tabular-nums text-sm font-bold text-amber-950">
+                  {formatRemaining(remaining)}
+                </strong>
+              </span>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <Button size="xs" variant="outline" onClick={release} disabled={busy}>
-              Отпустить
+
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={releaseAll}
+              disabled={busy}
+              className="text-slate-600 hover:text-rose-600 hover:bg-rose-50 rounded-xl"
+            >
+              <X className="h-3.5 w-3.5 mr-1" />
+              Отпустить всё
             </Button>
             <Button
-              size="xs"
+              size="sm"
               variant="default"
-              className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs font-semibold"
-              onClick={() => confirm(selectedSeat)}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs font-bold rounded-xl"
+              onClick={confirmAll}
               disabled={busy}
             >
-              <Check className="h-3.5 w-3.5 mr-1" />
-              {busy ? 'Оформляем…' : 'Подтвердить место'}
+              <Check className="h-3.5 w-3.5 mr-1.5" />
+              {busy ? 'Оформляем…' : `Оформить ${pluralTickets(mineSeats.length)}`}
             </Button>
           </div>
         </div>
@@ -229,7 +262,7 @@ export function HallPicker({
           viewBox={`0 0 ${width} ${height}`}
           className="mx-auto h-auto w-full max-w-[560px]"
           role="group"
-          aria-label="Схема зала и выбор места"
+          aria-label="Схема зала и выбор мест"
         >
           <defs>
             <linearGradient id="stageGrad" x1="0%" y1="0%" x2="0%" y2="100%">
@@ -284,8 +317,8 @@ export function HallPicker({
                 </text>
                 {sorted.map((seat, seatIndex) => {
                   const x = ROW_LABEL_W + seatIndex * (SEAT_W + GAP_X);
-                  const isSelected = selected === seat.id;
-                  const clickable = !disabled && (seat.status === 'free' || seat.status === 'mine');
+                  const isMine = seat.status === 'mine';
+                  const clickable = !disabled && (seat.status === 'free' || isMine);
                   return (
                     <g key={seat.id}>
                       <rect
@@ -295,8 +328,8 @@ export function HallPicker({
                         height={SEAT_H}
                         rx={6}
                         fill={FILLS[seat.status]}
-                        stroke={isSelected ? '#4F46E5' : STROKES[seat.status]}
-                        strokeWidth={isSelected ? 2.5 : 1}
+                        stroke={isMine ? '#4338CA' : STROKES[seat.status]}
+                        strokeWidth={isMine ? 2.5 : 1}
                         className={cn(clickable && !busy && 'cursor-pointer hover:opacity-85 transition-opacity')}
                         onClick={() => handleSeatClick(seat)}
                       />
@@ -315,8 +348,8 @@ export function HallPicker({
                         textAnchor="middle"
                         style={{ fontSize: 9, pointerEvents: 'none' }}
                         className={
-                          seat.status === 'mine'
-                            ? 'fill-white font-bold'
+                          isMine
+                            ? 'fill-white font-black'
                             : seat.status === 'taken'
                               ? 'fill-slate-400 font-medium'
                               : seat.status === 'held'
@@ -335,9 +368,9 @@ export function HallPicker({
         </svg>
       </div>
 
-      <p className="flex items-center gap-1.5 text-xs text-slate-500">
+      <p className="flex items-center gap-1.5 text-xs text-slate-500 font-medium">
         <ShieldCheck className="h-4 w-4 text-emerald-600 shrink-0" />
-        После выбора места оно бронируется за вами на 10 минут. Если не подтвердить регистрацию, бронь автоматически освободится.
+        Вы можете выбрать до 5 мест одновременно. Выбранные места бронируются за вами на 10 минут. Повторный клик по выбранному месту убирает его из брони.
       </p>
     </div>
   );
@@ -352,7 +385,7 @@ function Legend() {
       </span>
       <span className="flex items-center gap-1.5">
         <span className="h-3 w-3 rounded bg-indigo-600 shadow-2xs" />
-        Ваше место
+        Выбрано вами
       </span>
       <span className="flex items-center gap-1.5">
         <span className="h-3 w-3 rounded bg-amber-100 border border-amber-300 shadow-2xs" />

@@ -83,8 +83,8 @@ export const registrations = pgTable(
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [
-    uniqueIndex('registrations_event_user_uq').on(t.eventId, t.userId),
     index('idx_reg_user').on(t.userId),
+    index('idx_reg_event').on(t.eventId),
   ],
 );
 

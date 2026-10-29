@@ -54,14 +54,21 @@ export async function POST(request: Request, ctx: { params: Promise<{ id: string
 }
 
 /** DELETE /api/events/[id]/seats — досрочно снять свою бронь. */
-export async function DELETE(_request: Request, ctx: { params: Promise<{ id: string }> }) {
+export async function DELETE(request: Request, ctx: { params: Promise<{ id: string }> }) {
   const { id } = await ctx.params;
   if (!isUuid(id)) return fail('Некорректный идентификатор', 400);
 
   try {
     await requireRoleOrThrow('participant', 'organizer', 'admin');
+    let body: { seatId?: string } | null = null;
+    try {
+      body = (await request.json()) as { seatId?: string };
+    } catch {
+      // тело запроса опционально
+    }
+
     const { releaseHoldAction } = await import('@/server/actions/registrations');
-    const result = await releaseHoldAction(null, { eventId: id });
+    const result = await releaseHoldAction(null, { eventId: id, seatId: body?.seatId ?? null });
     if (!result.ok) return fail(result.error, 400);
     return ok({ released: true });
   } catch (e) {

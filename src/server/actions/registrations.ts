@@ -16,16 +16,28 @@ import type { ActionResult } from './auth';
  * текущим пользователем (бронь ещё не истекла).
  */
 export async function registerForEventAction(
-  _prev: ActionResult<{ registrationId: string }> | null,
-  input: { eventId: string; seatId?: string | null },
-): Promise<ActionResult<{ registrationId: string }>> {
+  _prev: ActionResult<{ registrationId: string; registrationIds?: string[] }> | null,
+  input: {
+    eventId: string;
+    seatId?: string | null;
+    seatIds?: string[] | null;
+    quantity?: number;
+  },
+): Promise<ActionResult<{ registrationId: string; registrationIds: string[] }>> {
   const user = await requireUser();
   const parsedId = idSchema.safeParse(input.eventId);
   if (!parsedId.success) {
     return { ok: false, error: 'Некорректное мероприятие' };
   }
   const eventId = parsedId.data;
-  const seatId = input.seatId ?? null;
+
+  // Нормализуем список мест
+  const seatIds: string[] =
+    Array.isArray(input.seatIds) && input.seatIds.length > 0
+      ? input.seatIds
+      : input.seatId
+        ? [input.seatId]
+        : [];
 
   const pool = getPool();
   const client = await pool.connect();
@@ -37,9 +49,12 @@ export async function registerForEventAction(
       status: string;
       start_date: Date;
       layout_rows: number | null;
-    }>('SELECT id, status, start_date, layout_rows FROM events WHERE id = $1 FOR UPDATE', [
-      eventId,
-    ]);
+      max_seats: number;
+      occupied_seats: number;
+    }>(
+      'SELECT id, status, start_date, layout_rows, max_seats, occupied_seats FROM events WHERE id = $1 FOR UPDATE',
+      [eventId],
+    );
     const event = eventRes.rows[0];
     if (!event) {
       await client.query('ROLLBACK');
@@ -54,94 +69,102 @@ export async function registerForEventAction(
       return { ok: false, error: 'Мероприятие уже началось' };
     }
 
-    // Повторную запись отсекаем до занятия места, иначе пользователь получил бы
-    // «Свободных мест нет» вместо понятного «Вы уже зарегистрированы».
-    const dupRes = await client.query<{ id: string; status: string }>(
-      'SELECT id, status FROM registrations WHERE event_id = $1 AND user_id = $2',
-      [eventId, user.id],
-    );
-    const duplicate = dupRes.rows[0];
-    if (duplicate?.status === 'active') {
+    // Для залов с рассадкой выбор мест обязателен
+    if (event.layout_rows !== null && seatIds.length === 0) {
       await client.query('ROLLBACK');
-      return { ok: false, error: 'Вы уже зарегистрированы' };
+      return { ok: false, error: 'Выберите хотя бы одно место в зале' };
     }
 
-    // Мероприятие с фиксированной рассадкой требует выбранного кресла.
-    if (event.layout_rows !== null && !seatId) {
+    const count =
+      event.layout_rows !== null
+        ? seatIds.length
+        : Math.max(1, Math.min(5, input.quantity ?? 1));
+
+    // Проверяем наличие достаточного количества мест
+    if (event.occupied_seats + count > event.max_seats) {
       await client.query('ROLLBACK');
-      return { ok: false, error: 'Выберите место в зале' };
+      const freeSeats = Math.max(0, event.max_seats - event.occupied_seats);
+      return {
+        ok: false,
+        error: `Недостаточно свободных мест (осталось: ${freeSeats})`,
+      };
     }
 
-    if (seatId) {
-      // Кресло должно принадлежать мероприятию, быть свободным и быть
-      // забронировано именно этим пользователем.
-      const seatRes = await client.query<{ id: string }>(
-        `SELECT s.id FROM seats s
-         WHERE s.id = $1 AND s.event_id = $2
-           AND NOT EXISTS (
-             SELECT 1 FROM registrations r
-             WHERE r.seat_id = s.id AND r.event_id = s.event_id AND r.status = 'active'
-           )
-           AND EXISTS (
-             SELECT 1 FROM seat_holds h
-             WHERE h.seat_id = s.id AND h.user_id = $3 AND h.expires_at > now()
-           )
-         FOR UPDATE OF s`,
-        [seatId, eventId, user.id],
-      );
-      if (seatRes.rowCount === 0) {
-        await client.query('ROLLBACK');
-        return {
-          ok: false,
-          error: 'Бронь места истекла или место занято. Выберите другое место.',
-        };
+    // Мероприятие с фиксированной рассадкой: проверяем каждое выбранное кресло
+    if (seatIds.length > 0) {
+      for (const sId of seatIds) {
+        const seatRes = await client.query<{ id: string }>(
+          `SELECT s.id FROM seats s
+           WHERE s.id = $1 AND s.event_id = $2
+             AND NOT EXISTS (
+               SELECT 1 FROM registrations r
+               WHERE r.seat_id = s.id AND r.event_id = s.event_id AND r.status = 'active'
+             )
+             AND EXISTS (
+               SELECT 1 FROM seat_holds h
+               WHERE h.seat_id = s.id AND h.user_id = $3 AND h.expires_at > now()
+             )
+           FOR UPDATE OF s`,
+          [sId, eventId, user.id],
+        );
+        if (seatRes.rowCount === 0) {
+          await client.query('ROLLBACK');
+          return {
+            ok: false,
+            error: 'Бронь одного из мест истекла или место занято. Выберите места повторно.',
+          };
+        }
       }
     }
 
-    // Атомарное занятие места.
+    // Атомарно занимаем необходимое число мест
     const seatCountRes = await client.query<{ id: string }>(
-      `UPDATE events SET occupied_seats = occupied_seats + 1
-       WHERE id = $1 AND status = 'published' AND occupied_seats < max_seats
+      `UPDATE events SET occupied_seats = occupied_seats + $1
+       WHERE id = $2 AND status = 'published' AND occupied_seats + $1 <= max_seats
        RETURNING id`,
-      [eventId],
+      [count, eventId],
     );
     if (seatCountRes.rowCount === 0) {
       await client.query('ROLLBACK');
       return { ok: false, error: 'Свободных мест нет' };
     }
 
-    // Возобновление ранее отменённой записи (новая строка нарушила бы UNIQUE).
-    if (duplicate) {
-      const upd = await client.query<{ id: string }>(
-        `UPDATE registrations SET status = 'active', seat_id = $2, created_at = now()
-         WHERE id = $1 RETURNING id`,
-        [duplicate.id, seatId],
-      );
-      if (seatId) {
-        await client.query('DELETE FROM seat_holds WHERE seat_id = $1', [seatId]);
+    const createdIds: string[] = [];
+
+    if (seatIds.length > 0) {
+      for (const sId of seatIds) {
+        const ins = await client.query<{ id: string }>(
+          `INSERT INTO registrations (event_id, user_id, seat_id, status)
+           VALUES ($1, $2, $3, 'active')
+           RETURNING id`,
+          [eventId, user.id, sId],
+        );
+        createdIds.push(ins.rows[0].id);
+        await client.query('DELETE FROM seat_holds WHERE seat_id = $1', [sId]);
       }
-      await client.query('COMMIT');
-
-      revalidatePath(`/events/${eventId}`);
-      revalidatePath('/my-tickets');
-      return { ok: true, data: { registrationId: upd.rows[0].id } };
-    }
-
-    const ins = await client.query<{ id: string }>(
-      `INSERT INTO registrations (event_id, user_id, seat_id) VALUES ($1, $2, $3) RETURNING id`,
-      [eventId, user.id, seatId],
-    );
-
-    // Бронь обслужила своё назначение — освобождаем кресло.
-    if (seatId) {
-      await client.query('DELETE FROM seat_holds WHERE seat_id = $1', [seatId]);
+    } else {
+      for (let i = 0; i < count; i++) {
+        const ins = await client.query<{ id: string }>(
+          `INSERT INTO registrations (event_id, user_id, seat_id, status)
+           VALUES ($1, $2, NULL, 'active')
+           RETURNING id`,
+          [eventId, user.id],
+        );
+        createdIds.push(ins.rows[0].id);
+      }
     }
 
     await client.query('COMMIT');
 
     revalidatePath(`/events/${eventId}`);
     revalidatePath('/my-tickets');
-    return { ok: true, data: { registrationId: ins.rows[0].id } };
+    return {
+      ok: true,
+      data: {
+        registrationId: createdIds[0],
+        registrationIds: createdIds,
+      },
+    };
   } catch (e) {
     await client.query('ROLLBACK').catch(() => undefined);
     console.error('registerForEvent failed', e);
@@ -235,16 +258,16 @@ export async function holdSeatAction(
   }
 }
 
-/** Досрочно снимает бронь (кнопка «Отпустить место»). */
+/** Досрочно снимает бронь (кнопка «Отпустить место» или отдельное кресло). */
 export async function releaseHoldAction(
   _prev: ActionResult<null> | null,
-  input: { eventId: string },
+  input: { eventId: string; seatId?: string | null },
 ): Promise<ActionResult<null>> {
   const user = await requireUser();
   const eventId = idSchema.safeParse(input.eventId);
   if (!eventId.success) return { ok: false, error: 'Некорректное мероприятие' };
 
-  await releaseHold(eventId.data, user.id);
+  await releaseHold(eventId.data, user.id, input.seatId ?? null);
   revalidatePath(`/events/${eventId.data}`);
   return { ok: true, data: null };
 }

@@ -122,11 +122,15 @@ export async function holdSeat(eventId: string, seatId: string, userId: string):
     `);
     if (existingReg.rows.length > 0) throw new HoldError('Это место уже занято');
 
-    // Повторная регистрация на это мероприятие — если уже есть активная запись, место бронировать нельзя.
-    const dup = await tx.execute(sql`
-      SELECT id FROM registrations WHERE event_id = ${eventId} AND user_id = ${userId} AND status = 'active'
+    // Проверяем лимит: максимум 5 мест в одном заказе
+    const countRes = await tx.execute(sql`
+      SELECT count(*) as count FROM seat_holds
+      WHERE event_id = ${eventId} AND user_id = ${userId} AND expires_at > now() AND seat_id <> ${seatId}
     `);
-    if (dup.rows.length > 0) throw new HoldError('Вы уже зарегистрированы на это мероприятие');
+    const currentHolds = parseInt((countRes.rows[0] as { count?: string })?.count ?? '0', 10);
+    if (currentHolds >= 5) {
+      throw new HoldError('Вы можете выбрать максимум 5 мест в одном заказе');
+    }
 
     // Снимаем только ИСТЁКШУЮ бронь этого кресла: безусловный DELETE здесь
     // сносил бы чужую живую бронь и позволял «украсть» занятое место.
@@ -138,20 +142,17 @@ export async function holdSeat(eventId: string, seatId: string, userId: string):
       SELECT id FROM seat_holds WHERE seat_id = ${seatId} AND expires_at > now()
     `);
     if (currentHold.rows.length > 0) {
-      throw new HoldError('Это место сейчас забронировано другим участником');
+      const isMine = (currentHold.rows[0] as { user_id?: string })?.user_id === userId;
+      if (!isMine) {
+        throw new HoldError('Это место сейчас забронировано другим участником');
+      }
     }
-
-    // У пользователя может быть только одна активная бронь на мероприятие:
-    // выбрал другое место — предыдущее освобождается.
-    await tx.execute(sql`
-      DELETE FROM seat_holds
-      WHERE event_id = ${eventId} AND user_id = ${userId} AND seat_id <> ${seatId}
-    `);
 
     const expiresAt = new Date(Date.now() + HOLD_TTL_MINUTES * 60 * 1000);
     await tx.execute(sql`
       INSERT INTO seat_holds (seat_id, event_id, user_id, expires_at)
       VALUES (${seatId}, ${eventId}, ${userId}, ${expiresAt})
+      ON CONFLICT (seat_id) DO UPDATE SET expires_at = ${expiresAt}
     `);
 
     return { ok: true as const, data: { seatId, expiresAt: expiresAt.toISOString() } };
@@ -165,14 +166,40 @@ export class HoldError extends Error {
   }
 }
 
-/** Снимает бронь пользователя на мероприятие (кнопка «Отпустить место»). */
-export async function releaseHold(eventId: string, userId: string): Promise<void> {
-  await db
-    .delete(seatHolds)
-    .where(and(eq(seatHolds.eventId, eventId), eq(seatHolds.userId, userId)));
+/** Снимает бронь пользователя на мероприятие (кнопка «Отпустить место» или отдельное кресло). */
+export async function releaseHold(eventId: string, userId: string, seatId?: string | null): Promise<void> {
+  if (seatId) {
+    await db
+      .delete(seatHolds)
+      .where(
+        and(
+          eq(seatHolds.eventId, eventId),
+          eq(seatHolds.userId, userId),
+          eq(seatHolds.seatId, seatId),
+        ),
+      );
+  } else {
+    await db
+      .delete(seatHolds)
+      .where(and(eq(seatHolds.eventId, eventId), eq(seatHolds.userId, userId)));
+  }
 }
 
-/** Активная бронь пользователя на мероприятие. */
+/** Все активные брони пользователя на мероприятие. */
+export async function getActiveHolds(eventId: string, userId: string) {
+  return await db
+    .select()
+    .from(seatHolds)
+    .where(
+      and(
+        eq(seatHolds.eventId, eventId),
+        eq(seatHolds.userId, userId),
+        gt(seatHolds.expiresAt, new Date()),
+      ),
+    );
+}
+
+/** Активная бронь пользователя на мероприятие (первая). */
 export async function getActiveHold(eventId: string, userId: string) {
   const [row] = await db
     .select()

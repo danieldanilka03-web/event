@@ -35,16 +35,21 @@ export async function POST(request: Request) {
     return fail((e as Error).message, e instanceof AuthError ? 401 : 500);
   }
 
-  let body: { eventId?: string; seatId?: string };
+  let body: { eventId?: string; seatId?: string; seatIds?: string[]; quantity?: number };
   try {
-    body = (await request.json()) as { eventId?: string; seatId?: string };
+    body = (await request.json()) as { eventId?: string; seatId?: string; seatIds?: string[]; quantity?: number };
   } catch {
     return fail('Ожидался JSON', 400);
   }
   if (!body.eventId || !isUuid(body.eventId)) return fail('Некорректное мероприятие', 400);
   if (body.seatId && !isUuid(body.seatId)) return fail('Некорректное место', 400);
 
-  const result = await registerForEventAction(null, { eventId: body.eventId, seatId: body.seatId ?? null });
+  const result = await registerForEventAction(null, {
+    eventId: body.eventId,
+    seatId: body.seatId ?? null,
+    seatIds: body.seatIds ?? null,
+    quantity: body.quantity ?? 1,
+  });
   if (!result.ok) return fail(result.error, 409);
   return ok(result.data, 201);
 }

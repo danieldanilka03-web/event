@@ -110,6 +110,21 @@ export async function getRegistrationForUser(eventId: string, userId: string) {
   return row ?? null;
 }
 
+export async function getUserRegistrationsForEvent(eventId: string, userId: string) {
+  return await db
+    .select({
+      id: registrations.id,
+      status: registrations.status,
+      seatId: registrations.seatId,
+      createdAt: registrations.createdAt,
+      rowLabel: seats.rowLabel,
+      seatNumber: seats.number,
+    })
+    .from(registrations)
+    .leftJoin(seats, eq(seats.id, registrations.seatId))
+    .where(and(eq(registrations.eventId, eventId), eq(registrations.userId, userId)));
+}
+
 export type TicketRow = {
   id: string;
   status: 'active' | 'cancelled';
