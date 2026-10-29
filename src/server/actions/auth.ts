@@ -71,9 +71,9 @@ export async function registerAction(
 }
 
 export async function loginAction(
-  _prev: ActionResult<{ id: string }> | null,
+  _prev: ActionResult<{ id: string; role: 'participant' | 'organizer' | 'admin' }> | null,
   formData: FormData,
-): Promise<ActionResult<{ id: string }>> {
+): Promise<ActionResult<{ id: string; role: 'participant' | 'organizer' | 'admin' }>> {
   const parsed = loginSchema.safeParse({
     email: formData.get('email'),
     password: formData.get('password'),
@@ -110,7 +110,7 @@ export async function loginAction(
     maxAge: sessionCookie.maxAge,
   });
 
-  return { ok: true, data: { id: user.id } };
+  return { ok: true, data: { id: user.id, role: user.role } };
 }
 
 export async function logoutAction() {

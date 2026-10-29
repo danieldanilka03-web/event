@@ -21,7 +21,54 @@ export async function Header() {
           <Link href="/" className="rounded-lg px-3 py-2 text-sm font-medium hover:bg-slate-100">
             Мероприятия
           </Link>
-          {user && (
+
+          {user?.role === 'organizer' && (
+            <>
+              <Link
+                href="/organizer"
+                className="rounded-lg px-3 py-2 text-sm font-semibold text-blue-700 bg-blue-50 hover:bg-blue-100 transition"
+              >
+                Дашборд
+              </Link>
+              <Link
+                href="/organizer/events"
+                className="rounded-lg px-3 py-2 text-sm font-medium hover:bg-slate-100"
+              >
+                Мои мероприятия
+              </Link>
+              <Link
+                href="/organizer/events/new"
+                className="rounded-lg px-3 py-2 text-sm font-medium text-[var(--primary)] hover:bg-slate-100"
+              >
+                + Создать событие
+              </Link>
+            </>
+          )}
+
+          {user?.role === 'admin' && (
+            <>
+              <Link
+                href="/admin"
+                className="rounded-lg px-3 py-2 text-sm font-semibold text-purple-700 bg-purple-50 hover:bg-purple-100 transition"
+              >
+                Админ-панель
+              </Link>
+              <Link
+                href="/admin/events"
+                className="rounded-lg px-3 py-2 text-sm font-medium hover:bg-slate-100"
+              >
+                Модерация
+              </Link>
+              <Link
+                href="/admin/users"
+                className="rounded-lg px-3 py-2 text-sm font-medium hover:bg-slate-100"
+              >
+                Пользователи
+              </Link>
+            </>
+          )}
+
+          {user?.role === 'participant' && (
             <Link href="/my-tickets" className="rounded-lg px-3 py-2 text-sm font-medium hover:bg-slate-100">
               Мои билеты
             </Link>

@@ -58,7 +58,13 @@ export function LoginForm() {
           return;
         }
         toast('Вы вошли в систему');
-        router.push(next);
+        let destination = next;
+        if (!rawNext || rawNext === '/my-tickets') {
+          if (result.data.role === 'admin') destination = '/admin';
+          else if (result.data.role === 'organizer') destination = '/organizer';
+          else destination = '/my-tickets';
+        }
+        router.push(destination);
         router.refresh();
       }}
     >

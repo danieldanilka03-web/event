@@ -11,7 +11,11 @@ export const dynamic = 'force-dynamic';
 
 export default async function LoginPage() {
   const user = await getCurrentUser();
-  if (user) redirect('/my-tickets');
+  if (user) {
+    if (user.role === 'admin') redirect('/admin');
+    if (user.role === 'organizer') redirect('/organizer');
+    redirect('/my-tickets');
+  }
 
   return (
     <div className="mx-auto w-full max-w-md px-4 py-12">

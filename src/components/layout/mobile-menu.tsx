@@ -42,22 +42,40 @@ export function MobileMenu({
           </Link>
           {user ? (
             <>
-              <Link href="/my-tickets" className={linkClass} onClick={() => setOpen(false)}>
-                Мои билеты
-              </Link>
+              {user.role === 'organizer' && (
+                <>
+                  <Link href="/organizer" className={`${linkClass} font-semibold text-blue-700 bg-blue-50/60`} onClick={() => setOpen(false)}>
+                    Дашборд организатора
+                  </Link>
+                  <Link href="/organizer/events" className={linkClass} onClick={() => setOpen(false)}>
+                    Мои мероприятия
+                  </Link>
+                  <Link href="/organizer/events/new" className={linkClass} onClick={() => setOpen(false)}>
+                    + Создать событие
+                  </Link>
+                </>
+              )}
+              {user.role === 'admin' && (
+                <>
+                  <Link href="/admin" className={`${linkClass} font-semibold text-purple-700 bg-purple-50/60`} onClick={() => setOpen(false)}>
+                    Админ-панель
+                  </Link>
+                  <Link href="/admin/events" className={linkClass} onClick={() => setOpen(false)}>
+                    Модерация событий
+                  </Link>
+                  <Link href="/admin/users" className={linkClass} onClick={() => setOpen(false)}>
+                    Пользователи
+                  </Link>
+                </>
+              )}
+              {user.role === 'participant' && (
+                <Link href="/my-tickets" className={linkClass} onClick={() => setOpen(false)}>
+                  Мои билеты
+                </Link>
+              )}
               <Link href="/profile" className={linkClass} onClick={() => setOpen(false)}>
                 Профиль
               </Link>
-              {(user.role === 'organizer' || user.role === 'admin') && (
-                <Link href="/organizer" className={linkClass} onClick={() => setOpen(false)}>
-                  Панель организатора
-                </Link>
-              )}
-              {user.role === 'admin' && (
-                <Link href="/admin" className={linkClass} onClick={() => setOpen(false)}>
-                  Админ-панель
-                </Link>
-              )}
               <p className="px-3 pt-2 text-xs text-[var(--muted-fg)]">{ROLE_LABEL[user.role]}</p>
               <button type="button" onClick={logout} className={`${linkClass} text-left text-[var(--danger)]`}>
                 Выйти
