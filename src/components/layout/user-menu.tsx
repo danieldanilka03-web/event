@@ -3,7 +3,7 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { LogOut, User, Shield, LayoutDashboard, ChevronDown, Ticket } from 'lucide-react';
+import { LogOut, User, Shield, LayoutDashboard, ChevronDown, Ticket, Calendar } from 'lucide-react';
 import { logoutAction } from '@/server/actions/auth';
 import { ROLE_LABEL } from '@/shared/constants';
 
@@ -37,6 +37,12 @@ export function UserMenu({ name, role }: { name: string; role: 'participant' | '
     router.refresh();
   }
 
+  const roleStyles = {
+    admin: 'bg-purple-100 text-purple-700 border-purple-200',
+    organizer: 'bg-blue-100 text-blue-700 border-blue-200',
+    participant: 'bg-indigo-100 text-indigo-700 border-indigo-200',
+  }[role];
+
   return (
     <div className="relative" ref={ref}>
       <button
@@ -44,53 +50,108 @@ export function UserMenu({ name, role }: { name: string; role: 'participant' | '
         onClick={() => setOpen((v) => !v)}
         aria-haspopup="menu"
         aria-expanded={open}
-        className="flex items-center gap-2 rounded-xl px-2 py-1.5 hover:bg-slate-100"
+        className="flex items-center gap-2.5 rounded-xl border border-slate-200/80 bg-white px-2.5 py-1.5 shadow-2xs hover:bg-slate-50 transition-colors"
       >
-        <span className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-100 text-sm font-semibold text-indigo-700">
+        <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-indigo-600 text-xs font-bold text-white shadow-xs">
           {initials(name)}
         </span>
-        <span className="hidden text-sm font-medium lg:inline">{name}</span>
-        <ChevronDown className="h-4 w-4 text-slate-400" aria-hidden />
+        <span className="hidden text-sm font-semibold text-slate-800 lg:inline">{name}</span>
+        <ChevronDown
+          className={`h-4 w-4 text-slate-400 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
+          aria-hidden
+        />
       </button>
 
       {open && (
         <div
           role="menu"
-          className="absolute right-0 mt-2 w-56 rounded-xl border border-[var(--border-ui)] bg-white py-1 shadow-lg"
+          className="absolute right-0 mt-2 w-60 rounded-2xl border border-slate-200/80 bg-white p-1.5 shadow-xl animate-in fade-in zoom-in-95 duration-100 z-50"
         >
-          <p className="px-4 py-2 text-xs font-semibold text-[var(--muted-fg)] border-b border-slate-100">{ROLE_LABEL[role]}</p>
-          {role === 'organizer' && (
-            <Link href="/organizer" role="menuitem" onClick={() => setOpen(false)} className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-blue-700 hover:bg-blue-50">
-              <LayoutDashboard className="h-4 w-4" aria-hidden /> Панель организатора
-            </Link>
-          )}
-          {role === 'admin' && (
-            <>
-              <Link href="/admin" role="menuitem" onClick={() => setOpen(false)} className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-purple-700 hover:bg-purple-50">
-                <Shield className="h-4 w-4" aria-hidden /> Админ-панель
+          <div className="px-3 py-2 border-b border-slate-100 mb-1">
+            <p className="text-xs font-medium text-slate-400">Роль в системе</p>
+            <div className="mt-1 flex items-center justify-between">
+              <span className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-semibold border ${roleStyles}`}>
+                {ROLE_LABEL[role]}
+              </span>
+              <span className="text-xs text-slate-500 truncate max-w-[120px]">{name}</span>
+            </div>
+          </div>
+
+          <div className="space-y-0.5">
+            {role === 'organizer' && (
+              <>
+                <Link
+                  href="/organizer"
+                  role="menuitem"
+                  onClick={() => setOpen(false)}
+                  className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-medium text-blue-700 hover:bg-blue-50 transition-colors"
+                >
+                  <LayoutDashboard className="h-4 w-4 text-blue-600" aria-hidden /> Панель организатора
+                </Link>
+                <Link
+                  href="/organizer/events"
+                  role="menuitem"
+                  onClick={() => setOpen(false)}
+                  className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
+                >
+                  <Calendar className="h-4 w-4 text-slate-500" aria-hidden /> Мои мероприятия
+                </Link>
+              </>
+            )}
+
+            {role === 'admin' && (
+              <>
+                <Link
+                  href="/admin"
+                  role="menuitem"
+                  onClick={() => setOpen(false)}
+                  className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-medium text-purple-700 hover:bg-purple-50 transition-colors"
+                >
+                  <Shield className="h-4 w-4 text-purple-600" aria-hidden /> Админ-панель
+                </Link>
+                <Link
+                  href="/organizer"
+                  role="menuitem"
+                  onClick={() => setOpen(false)}
+                  className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
+                >
+                  <LayoutDashboard className="h-4 w-4 text-slate-500" aria-hidden /> Панель организатора
+                </Link>
+              </>
+            )}
+
+            {role === 'participant' && (
+              <Link
+                href="/my-tickets"
+                role="menuitem"
+                onClick={() => setOpen(false)}
+                className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-medium text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 transition-colors"
+              >
+                <Ticket className="h-4 w-4 text-indigo-600" aria-hidden /> Мои билеты
               </Link>
-              <Link href="/organizer" role="menuitem" onClick={() => setOpen(false)} className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-slate-50">
-                <LayoutDashboard className="h-4 w-4" aria-hidden /> Панель организатора
-              </Link>
-            </>
-          )}
-          {role === 'participant' && (
-            <Link href="/my-tickets" role="menuitem" onClick={() => setOpen(false)} className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-slate-50">
-              <Ticket className="h-4 w-4" aria-hidden /> Мои билеты
+            )}
+
+            <Link
+              href="/profile"
+              role="menuitem"
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
+            >
+              <User className="h-4 w-4 text-slate-500" aria-hidden /> Профиль
             </Link>
-          )}
-          <Link href="/profile" role="menuitem" onClick={() => setOpen(false)} className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-slate-50">
-            <User className="h-4 w-4" aria-hidden /> Профиль
-          </Link>
-          <button
-            type="button"
-            role="menuitem"
-            disabled={pending}
-            onClick={handleLogout}
-            className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-[var(--danger)] hover:bg-slate-50 disabled:opacity-50"
-          >
-            <LogOut className="h-4 w-4" aria-hidden /> {pending ? 'Выходим…' : 'Выйти'}
-          </button>
+          </div>
+
+          <div className="mt-1 pt-1 border-t border-slate-100">
+            <button
+              type="button"
+              role="menuitem"
+              disabled={pending}
+              onClick={handleLogout}
+              className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-left text-sm font-medium text-rose-600 hover:bg-rose-50 transition-colors disabled:opacity-50"
+            >
+              <LogOut className="h-4 w-4" aria-hidden /> {pending ? 'Выходим…' : 'Выйти из аккаунта'}
+            </button>
+          </div>
         </div>
       )}
     </div>

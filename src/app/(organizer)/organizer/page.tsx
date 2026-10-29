@@ -45,34 +45,37 @@ export default async function OrganizerDashboard() {
         />
       </div>
 
-      <div className="mt-6 rounded-xl border border-[var(--border-ui)] bg-white">
-        <div className="border-b border-[var(--border-ui)] p-4">
-          <h2 className="text-lg font-semibold">Мои мероприятия</h2>
+      <div className="mt-8 overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-xs">
+        <div className="flex items-center justify-between border-b border-slate-100 p-5">
+          <h2 className="text-base font-bold tracking-tight text-slate-900">Последние мероприятия</h2>
+          <Link href="/organizer/events" className="text-xs font-semibold text-indigo-600 hover:underline">
+            Все мероприятия →
+          </Link>
         </div>
         {events.items.length === 0 ? (
-          <p className="p-6 text-sm text-[var(--muted-fg)]">
+          <p className="p-6 text-sm text-slate-500">
             Пока нет мероприятий.{' '}
-            <Link href="/organizer/events/new" className="text-[var(--primary)] hover:underline">
+            <Link href="/organizer/events/new" className="font-semibold text-indigo-600 hover:underline">
               Создайте первое
             </Link>
             .
           </p>
         ) : (
-          <Table>
+          <Table className="min-w-[800px]">
             <THead>
               <TH>Название</TH>
               <TH>Дата</TH>
               <TH>Статус</TH>
               <TH>Заполняемость</TH>
-              <TH aria-label="Действия" />
+              <TH className="text-right">Управление</TH>
             </THead>
             <tbody>
               {events.items.slice(0, 8).map((event) => {
                 const percent = fillPercent(event.maxSeats, event.occupiedSeats);
                 return (
                   <TR key={event.id}>
-                    <TD className="max-w-[240px] truncate font-medium">{event.title}</TD>
-                    <TD className="whitespace-nowrap text-[var(--muted-fg)]">
+                    <TD className="max-w-[240px] truncate font-semibold text-slate-900">{event.title}</TD>
+                    <TD className="whitespace-nowrap text-slate-500 text-xs font-medium">
                       {formatEventDateTime(event.startDate)}
                     </TD>
                     <TD>
@@ -94,18 +97,18 @@ export default async function OrganizerDashboard() {
                     </TD>
                     <TD className="min-w-[160px]">
                       <div className="flex items-center gap-2">
-                        <div className="w-24">
+                        <div className="w-20">
                           <Progress value={percent} />
                         </div>
-                        <span className="whitespace-nowrap text-sm text-[var(--muted-fg)]">
-                          {event.occupiedSeats}/{event.maxSeats} · {percent}%
+                        <span className="whitespace-nowrap text-xs text-slate-500">
+                          {event.occupiedSeats}/{event.maxSeats} ({percent}%)
                         </span>
                       </div>
                     </TD>
-                    <TD>
+                    <TD className="whitespace-nowrap text-right">
                       <Link
                         href={`/organizer/events/${event.id}/participants`}
-                        className="text-sm font-medium text-[var(--primary)] hover:underline"
+                        className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 shadow-2xs hover:bg-slate-50 transition-colors"
                       >
                         Участники
                       </Link>

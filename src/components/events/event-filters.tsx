@@ -43,9 +43,9 @@ export function EventFilters({ query }: { query: CatalogQuery }) {
   return (
     <aside aria-label="Фильтры каталога" className="lg:sticky lg:top-20 lg:self-start">
       <div className="hidden lg:block">
-        <div className="rounded-xl border border-[var(--border-ui)] bg-white p-4">
-          <h2 className="mb-3 flex items-center gap-2 text-lg font-semibold">
-            <Filter className="h-4 w-4" aria-hidden /> Фильтры
+        <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs">
+          <h2 className="mb-4 flex items-center gap-2 text-base font-bold tracking-tight text-slate-900">
+            <Filter className="h-4 w-4 text-indigo-600" aria-hidden /> Фильтры
           </h2>
           {form}
         </div>
@@ -53,13 +53,13 @@ export function EventFilters({ query }: { query: CatalogQuery }) {
 
       <Button
         variant="outline"
-        className="w-full lg:hidden"
+        className="w-full lg:hidden rounded-xl font-semibold shadow-2xs"
         onClick={() => setOpen(true)}
         aria-label="Открыть фильтры"
       >
-        <Filter className="h-4 w-4" aria-hidden /> Фильтры
+        <Filter className="h-4 w-4 mr-1 text-indigo-600" aria-hidden /> Фильтры
       </Button>
-      <Sheet open={open} onClose={() => setOpen(false)} title="Фильтры">
+      <Sheet open={open} onClose={() => setOpen(false)} title="Фильтры мероприятий">
         {form}
       </Sheet>
     </aside>
@@ -78,6 +78,8 @@ function FilterForm({
   const [from, setFrom] = React.useState(query.from ?? '');
   const [to, setTo] = React.useState(query.to ?? '');
 
+  const hasFilters = Boolean(q || category || from || to);
+
   return (
     <form
       className="space-y-4"
@@ -91,7 +93,7 @@ function FilterForm({
           id="filter-q"
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          placeholder="Название мероприятия"
+          placeholder="Название события"
         />
       </Field>
 
@@ -118,26 +120,29 @@ function FilterForm({
         <Input id="filter-to" type="date" value={to} onChange={(e) => setTo(e.target.value)} />
       </Field>
 
-      <div className="flex gap-2">
-        <Button type="submit" className="flex-1">
+      <div className="flex gap-2 pt-1">
+        <Button type="submit" className="flex-1 font-semibold">
           Применить
         </Button>
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => {
-            setQ('');
-            setCategory('');
-            setFrom('');
-            setTo('');
-            onApply({ q: '', category: '', from: '', to: '' });
-          }}
-          aria-label="Сбросить фильтры"
-        >
-          <RotateCcw className="h-4 w-4" aria-hidden />
-        </Button>
+        {hasFilters && (
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => {
+              setQ('');
+              setCategory('');
+              setFrom('');
+              setTo('');
+              onApply({ q: '', category: '', from: '', to: '' });
+            }}
+            title="Сбросить все фильтры"
+            aria-label="Сбросить все фильтры"
+          >
+            <RotateCcw className="h-4 w-4 text-slate-500" aria-hidden />
+          </Button>
+        )}
       </div>
-      <p className="text-sm text-[var(--muted-fg)]">На странице {PAGE_SIZE} мероприятий</p>
+      <p className="text-xs text-slate-400 text-center">Отображается по {PAGE_SIZE} событий</p>
     </form>
   );
 }
