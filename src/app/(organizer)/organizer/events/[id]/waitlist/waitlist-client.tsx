@@ -101,13 +101,11 @@ function StatusBadge({ status }: { status: WaitlistStatus }) {
 
 export function WaitlistClient({
   eventId,
-  eventTitle,
   stats,
   entries,
   hasLayout,
 }: {
   eventId: string;
-  eventTitle: string;
   stats: WaitlistStats;
   entries: WaitlistClientEntry[];
   hasLayout: boolean;

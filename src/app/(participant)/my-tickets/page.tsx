@@ -19,7 +19,7 @@ export default async function MyTicketsPage() {
     waitlistId: o.waitlistId,
     eventId: o.eventId,
     eventTitle: o.eventTitle,
-    eventStartDate: o.eventStartDate,
+    eventStartDate: o.eventStartDate ? o.eventStartDate.toISOString() : '',
     expiresAt: o.expiresAt ? o.expiresAt.toISOString() : null,
     seatLabel: o.rowLabel && o.seatNumber !== null ? `Ряд ${o.rowLabel}, место ${o.seatNumber}` : null,
   }));

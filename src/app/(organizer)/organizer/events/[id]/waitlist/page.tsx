@@ -62,7 +62,6 @@ export default async function WaitlistPage({ params }: { params: Promise<{ id: s
     >
       <WaitlistClient
         eventId={event.id}
-        eventTitle={event.title}
         stats={stats}
         entries={entries}
         hasLayout={Boolean(event.layoutRows)}

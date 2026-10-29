@@ -14,7 +14,7 @@ export type UserActiveOffer = {
   waitlistId: string;
   eventId: string;
   eventTitle: string;
-  eventStartDate: string;
+  eventStartDate: string | Date;
   expiresAt: string | null;
   seatLabel: string | null;
 };
