@@ -220,18 +220,18 @@ export function WaitlistClient({
           }
         />
       ) : (
-        <div className="overflow-hidden rounded-xl border border-[var(--border-ui)] bg-white shadow-2xs">
-          <Table className="min-w-[880px]">
+        <div className="overflow-x-auto rounded-2xl border border-slate-200/80 bg-white shadow-2xs">
+          <Table className="min-w-[940px]">
             <THead>
-              <TH>#</TH>
-              <TH>Участник</TH>
-              <TH>Контакты</TH>
-              <TH>Приоритет</TH>
-              <TH>Статус</TH>
-              {hasLayout && <TH>Место</TH>}
-              <TH>Таймер / Срок</TH>
-              <TH>Дата заявки</TH>
-              <TH aria-label="Действия" />
+              <TH className="w-12">#</TH>
+              <TH className="min-w-[180px]">Участник</TH>
+              <TH className="min-w-[180px]">Контакты</TH>
+              <TH className="min-w-[130px]">Приоритет</TH>
+              <TH className="min-w-[120px]">Статус</TH>
+              {hasLayout && <TH className="min-w-[130px]">Место</TH>}
+              <TH className="min-w-[130px]">Таймер / Срок</TH>
+              <TH className="min-w-[150px]">Дата заявки</TH>
+              <TH className="min-w-[120px] text-right" aria-label="Действия">Управление</TH>
             </THead>
             <tbody>
               {filteredEntries.map((entry, idx) => {

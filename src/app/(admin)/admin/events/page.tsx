@@ -31,15 +31,15 @@ export default async function AdminEventsPage({
         <EmptyState title="Ничего не найдено" description="Мероприятий пока нет." />
       ) : (
         <>
-          <div className="overflow-hidden rounded-xl border border-[var(--border-ui)] bg-white shadow-2xs">
-            <Table className="min-w-[920px]">
+          <div className="overflow-x-auto rounded-2xl border border-slate-200/80 bg-white shadow-2xs">
+            <Table className="min-w-[1000px]">
               <THead>
-                <TH>Мероприятие</TH>
-                <TH>Организатор</TH>
-                <TH>Дата</TH>
-                <TH>Места</TH>
-                <TH>Статус</TH>
-                <TH aria-label="Действия" />
+                <TH className="min-w-[280px]">Мероприятие</TH>
+                <TH className="min-w-[170px]">Организатор</TH>
+                <TH className="min-w-[130px]">Дата</TH>
+                <TH className="min-w-[100px]">Места</TH>
+                <TH className="min-w-[130px]">Статус</TH>
+                <TH className="min-w-[260px] text-right" aria-label="Действия">Управление</TH>
               </THead>
               <tbody>
                 <AdminEventsClient events={items} />

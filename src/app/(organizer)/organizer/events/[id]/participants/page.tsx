@@ -13,6 +13,15 @@ import { organizerNav } from '../../../nav';
 export const metadata: Metadata = { title: 'Участники мероприятия' };
 export const dynamic = 'force-dynamic';
 
+function initials(name: string): string {
+  return name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((p) => p[0]?.toUpperCase() ?? '')
+    .join('');
+}
+
 export default async function ParticipantsPage({ params }: { params: Promise<{ id: string }> }) {
   const user = await requireUser();
   if (user.role !== 'organizer' && user.role !== 'admin') notFound();
@@ -56,33 +65,46 @@ export default async function ParticipantsPage({ params }: { params: Promise<{ i
       {participants.length === 0 ? (
         <EmptyState title="Ничего не найдено" description="На это мероприятие пока никто не записался." />
       ) : (
-        <div className="overflow-hidden rounded-xl border border-[var(--border-ui)] bg-white shadow-2xs">
-          <Table className="min-w-[760px]">
+        <div className="overflow-x-auto rounded-2xl border border-slate-200/80 bg-white shadow-2xs">
+          <Table className="min-w-[840px]">
             <THead>
-              <TH>Участник</TH>
-              <TH>Email</TH>
-              <TH>Телефон</TH>
-              {event.layoutRows && <TH>Место</TH>}
-              <TH>Статус</TH>
-              <TH>Дата записи</TH>
+              <TH className="min-w-[240px]">Участник</TH>
+              <TH className="min-w-[180px]">Email</TH>
+              <TH className="min-w-[140px]">Телефон</TH>
+              {event.layoutRows && <TH className="min-w-[140px]">Место в зале</TH>}
+              <TH className="min-w-[110px]">Статус</TH>
+              <TH className="min-w-[160px]">Дата записи</TH>
             </THead>
-            <tbody>
+            <tbody className="divide-y divide-slate-100">
               {participants.map((p) => (
-                <TR key={p.id}>
-                  <TD className="font-medium">{p.fullName}</TD>
-                  <TD className="text-[var(--muted-fg)]">{p.email}</TD>
-                  <TD className="text-[var(--muted-fg)]">{p.phone ?? '—'}</TD>
+                <TR key={p.id} className="hover:bg-slate-50/60 transition-colors">
+                  <TD className="py-3.5">
+                    <div className="flex items-center gap-2.5">
+                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-indigo-50 text-indigo-700 font-bold text-xs border border-indigo-100">
+                        {initials(p.fullName)}
+                      </span>
+                      <span className="font-bold text-slate-900">{p.fullName}</span>
+                    </div>
+                  </TD>
+                  <TD className="text-xs text-slate-600 py-3.5">{p.email}</TD>
+                  <TD className="text-xs text-slate-500 py-3.5">{p.phone ?? '—'}</TD>
                   {event.layoutRows && (
-                    <TD className="text-[var(--foreground)] font-medium">
-                      {p.rowLabel && p.seatNumber !== null ? `Ряд ${p.rowLabel}, место ${p.seatNumber}` : '—'}
+                    <TD className="text-xs font-bold text-indigo-900 py-3.5">
+                      {p.rowLabel && p.seatNumber !== null ? (
+                        <span className="inline-flex items-center rounded-md bg-indigo-50 px-2 py-0.5 text-xs text-indigo-700 border border-indigo-100">
+                          Ряд {p.rowLabel}, место {p.seatNumber}
+                        </span>
+                      ) : (
+                        '—'
+                      )}
                     </TD>
                   )}
-                  <TD>
+                  <TD className="py-3.5">
                     <Badge tone={p.status === 'active' ? 'success' : 'neutral'}>
                       {p.status === 'active' ? 'Активна' : 'Отменена'}
                     </Badge>
                   </TD>
-                  <TD className="whitespace-nowrap text-[var(--muted-fg)]">
+                  <TD className="whitespace-nowrap text-xs text-slate-500 py-3.5">
                     {formatEventDateTime(p.createdAt)}
                   </TD>
                 </TR>

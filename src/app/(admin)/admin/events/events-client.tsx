@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
-import { Trash2 } from 'lucide-react';
+import { Trash2, CalendarDays, UserCheck } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Select } from '@/components/ui/input';
@@ -98,19 +98,27 @@ export function AdminEventsClient({ events }: { events: Row[] }) {
   return (
     <>
       {events.map((event) => (
-        <tr key={event.id} className="border-t border-[var(--border-ui)]">
-          <td className="px-4 py-3">
-            <p className="max-w-[260px] truncate font-medium">{event.title}</p>
-            <p className="text-sm text-[var(--muted-fg)]">{event.category}</p>
+        <tr key={event.id} className="border-t border-slate-100 hover:bg-slate-50/60 transition-colors">
+          <td className="px-4 py-3.5">
+            <p className="max-w-[280px] truncate font-bold text-slate-900">{event.title}</p>
+            <p className="text-xs font-medium text-slate-500 mt-0.5">{event.category}</p>
           </td>
-          <td className="text-[var(--muted-fg)]">{event.organizerName}</td>
-          <td className="whitespace-nowrap text-[var(--muted-fg)]">
-            {event.startDate.toLocaleDateString('ru-RU')}
+          <td className="px-4 py-3.5 text-xs font-semibold text-slate-700 whitespace-nowrap">
+            <span className="inline-flex items-center gap-1">
+              <UserCheck className="h-3.5 w-3.5 text-slate-400" />
+              {event.organizerName ?? 'Не указан'}
+            </span>
           </td>
-          <td className="whitespace-nowrap text-[var(--muted-fg)]">
-            {event.occupiedSeats}/{event.maxSeats}
+          <td className="px-4 py-3.5 whitespace-nowrap text-xs font-medium text-slate-600">
+            <span className="inline-flex items-center gap-1">
+              <CalendarDays className="h-3.5 w-3.5 text-indigo-500" />
+              {event.startDate.toLocaleDateString('ru-RU')}
+            </span>
           </td>
-          <td>
+          <td className="px-4 py-3.5 whitespace-nowrap text-xs font-bold text-slate-800">
+            {event.occupiedSeats} / {event.maxSeats}
+          </td>
+          <td className="px-4 py-3.5 whitespace-nowrap">
             <Badge
               tone={
                 event.status === 'published' ? 'success' : event.status === 'cancelled' ? 'danger' : 'neutral'
@@ -123,7 +131,7 @@ export function AdminEventsClient({ events }: { events: Row[] }) {
                   : 'Черновик'}
             </Badge>
           </td>
-          <td className="whitespace-nowrap px-4 py-3 text-right">
+          <td className="whitespace-nowrap px-4 py-3.5 text-right">
             <div className="inline-flex items-center justify-end gap-2">
               <StatusForm event={event} />
               <DeleteButton event={event} />

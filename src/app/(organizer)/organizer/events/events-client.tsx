@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Eye, EyeOff, XCircle, Pencil, Users, Trash2, Clock } from 'lucide-react';
+import { Eye, EyeOff, XCircle, Pencil, Users, Trash2, Clock, MapPin, CalendarDays } from 'lucide-react';
 import type { EventWithParticipants } from '@/server/db/queries';
 import { fillPercent, formatEventDateTime, isPast } from '@/shared/format';
 import { Badge, Progress } from '@/components/ui/badge';
@@ -198,34 +198,40 @@ export function OrganizerEventsClient({ events }: { events: EventWithParticipant
 
   return (
     <>
-      <div className="overflow-hidden rounded-xl border border-[var(--border-ui)] bg-white shadow-2xs">
-        <Table className="min-w-[960px]">
+      <div className="overflow-x-auto rounded-2xl border border-slate-200/80 bg-white shadow-2xs">
+        <Table className="min-w-[1040px]">
           <THead>
-            <TH className="w-[280px]">Название</TH>
-            <TH className="w-[150px]">Дата</TH>
-            <TH className="w-[120px]">Статус</TH>
-            <TH className="w-[140px]">Заполняемость</TH>
-            <TH className="text-right">Действия</TH>
+            <TH className="min-w-[280px]">Название</TH>
+            <TH className="min-w-[160px]">Дата и время</TH>
+            <TH className="min-w-[130px]">Статус</TH>
+            <TH className="min-w-[170px]">Заполняемость</TH>
+            <TH className="min-w-[340px] text-right">Действия</TH>
           </THead>
-          <tbody>
+          <tbody className="divide-y divide-slate-100">
             {events.map((event) => {
               const percent = fillPercent(event.maxSeats, event.occupiedSeats);
               const activeParticipants = event.activeParticipants;
               return (
-                <TR key={event.id}>
-                  <TD className="max-w-[280px]">
-                    <p className="truncate font-medium">{event.title}</p>
-                    <p className="truncate text-sm text-[var(--muted-fg)]">{event.location}</p>
+                <TR key={event.id} className="hover:bg-slate-50/60 transition-colors">
+                  <TD className="max-w-[280px] py-4">
+                    <p className="truncate font-bold text-slate-900">{event.title}</p>
+                    <p className="flex items-center gap-1.5 truncate text-xs text-slate-500 mt-1">
+                      <MapPin className="h-3 w-3 shrink-0 text-slate-400" />
+                      <span className="truncate">{event.location}</span>
+                    </p>
                   </TD>
-                  <TD className="whitespace-nowrap text-[var(--muted-fg)]">
-                    {formatEventDateTime(event.startDate)}
+                  <TD className="whitespace-nowrap py-4">
+                    <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-700">
+                      <CalendarDays className="h-3.5 w-3.5 text-indigo-500 shrink-0" />
+                      {formatEventDateTime(event.startDate)}
+                    </div>
                     {isPast(event.startDate) && (
-                      <Badge tone="neutral" className="ml-2">
-                        Прошло
-                      </Badge>
+                      <span className="inline-block mt-1 text-[11px] font-medium text-slate-400">
+                        Уже состоялось
+                      </span>
                     )}
                   </TD>
-                  <TD className="whitespace-nowrap">
+                  <TD className="whitespace-nowrap py-4">
                     <Badge
                       tone={
                         event.status === 'published'
@@ -242,43 +248,46 @@ export function OrganizerEventsClient({ events }: { events: EventWithParticipant
                           : 'Черновик'}
                     </Badge>
                   </TD>
-                  <TD className="whitespace-nowrap">
-                    <div className="flex items-center gap-2">
-                      <div className="w-16">
+                  <TD className="whitespace-nowrap py-4">
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="font-bold text-slate-800">
+                          {event.occupiedSeats} / {event.maxSeats}
+                        </span>
+                        <span className="text-[11px] font-medium text-slate-400">{percent}%</span>
+                      </div>
+                      <div className="w-28">
                         <Progress value={percent} />
                       </div>
-                      <span className="whitespace-nowrap text-xs text-[var(--muted-fg)]">
-                        {event.occupiedSeats}/{event.maxSeats}
-                      </span>
                     </div>
                   </TD>
-                  <TD className="whitespace-nowrap text-right">
+                  <TD className="whitespace-nowrap text-right py-4">
                     <div className="inline-flex items-center justify-end gap-1.5">
                       <ButtonLink
                         href={`/organizer/events/${event.id}/participants`}
                         variant="outline"
                         size="sm"
-                        className="h-8 px-2.5 text-xs font-medium"
+                        className="h-8 px-2.5 text-xs font-semibold text-slate-700 border-slate-200 hover:bg-slate-50 shadow-2xs"
                         title="Список участников"
                       >
-                        <Users className="h-3.5 w-3.5 text-[var(--muted-fg)]" aria-hidden />
-                        Участники
+                        <Users className="h-3.5 w-3.5 text-indigo-600 mr-1" aria-hidden />
+                        Участники ({activeParticipants})
                       </ButtonLink>
                       <ButtonLink
                         href={`/organizer/events/${event.id}/waitlist`}
                         variant="outline"
                         size="sm"
-                        className="h-8 px-2.5 text-xs font-medium"
+                        className="h-8 px-2.5 text-xs font-semibold text-slate-700 border-slate-200 hover:bg-slate-50 shadow-2xs"
                         title="Лист ожидания"
                       >
-                        <Clock className="h-3.5 w-3.5 text-[var(--muted-fg)]" aria-hidden />
+                        <Clock className="h-3.5 w-3.5 text-amber-600 mr-1" aria-hidden />
                         Очередь
                       </ButtonLink>
                       <ButtonLink
                         href={`/organizer/events/${event.id}/edit`}
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 text-[var(--muted-fg)] hover:text-[var(--foreground)]"
+                        className="h-8 w-8 text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-lg"
                         title="Редактировать мероприятие"
                         aria-label="Редактировать мероприятие"
                       >

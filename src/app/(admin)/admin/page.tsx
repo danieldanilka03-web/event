@@ -39,7 +39,7 @@ export default async function AdminDashboard() {
         />
       </div>
 
-      <div className="mt-8 overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-xs">
+      <div className="mt-8 overflow-x-auto rounded-2xl border border-slate-200/80 bg-white shadow-2xs">
         <div className="border-b border-slate-100 p-5">
           <h2 className="text-base font-bold tracking-tight text-slate-900">Последние мероприятия на платформе</h2>
         </div>

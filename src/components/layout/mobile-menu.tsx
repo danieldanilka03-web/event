@@ -34,6 +34,9 @@ export function MobileMenu({
 
   const linkClass = 'block rounded-xl px-3.5 py-2.5 text-sm font-semibold transition-colors';
 
+  const activeLinkClass = 'bg-indigo-50 text-indigo-700 font-bold border border-indigo-200/80';
+  const inactiveLinkClass = 'text-slate-700 hover:bg-slate-100/70 font-medium';
+
   return (
     <>
       <button
@@ -48,12 +51,7 @@ export function MobileMenu({
         <nav className="flex flex-col gap-1 mt-2" aria-label="Мобильная навигация">
           <Link
             href="/"
-            className={cn(
-              linkClass,
-              isActive('/')
-                ? 'bg-indigo-50 text-indigo-700 font-bold border border-indigo-100'
-                : 'text-slate-700 hover:bg-slate-100',
-            )}
+            className={cn(linkClass, isActive('/') ? activeLinkClass : inactiveLinkClass)}
             onClick={() => setOpen(false)}
           >
             Мероприятия
@@ -65,24 +63,14 @@ export function MobileMenu({
                 <>
                   <Link
                     href="/organizer"
-                    className={cn(
-                      linkClass,
-                      isActive('/organizer')
-                        ? 'bg-blue-100 text-blue-900 font-bold border border-blue-200'
-                        : 'text-slate-700 hover:bg-slate-100',
-                    )}
+                    className={cn(linkClass, isActive('/organizer') ? activeLinkClass : inactiveLinkClass)}
                     onClick={() => setOpen(false)}
                   >
                     Дашборд организатора
                   </Link>
                   <Link
                     href="/organizer/events"
-                    className={cn(
-                      linkClass,
-                      isActive('/organizer/events')
-                        ? 'bg-blue-100 text-blue-900 font-bold border border-blue-200'
-                        : 'text-slate-700 hover:bg-slate-100',
-                    )}
+                    className={cn(linkClass, isActive('/organizer/events') ? activeLinkClass : inactiveLinkClass)}
                     onClick={() => setOpen(false)}
                   >
                     Мои мероприятия
@@ -106,36 +94,21 @@ export function MobileMenu({
                 <>
                   <Link
                     href="/admin"
-                    className={cn(
-                      linkClass,
-                      isActive('/admin')
-                        ? 'bg-purple-100 text-purple-900 font-bold border border-purple-200'
-                        : 'text-slate-700 hover:bg-slate-100',
-                    )}
+                    className={cn(linkClass, isActive('/admin') ? activeLinkClass : inactiveLinkClass)}
                     onClick={() => setOpen(false)}
                   >
-                    Админ-панель
+                    Статистика
                   </Link>
                   <Link
                     href="/admin/events"
-                    className={cn(
-                      linkClass,
-                      isActive('/admin/events')
-                        ? 'bg-purple-100 text-purple-900 font-bold border border-purple-200'
-                        : 'text-slate-700 hover:bg-slate-100',
-                    )}
+                    className={cn(linkClass, isActive('/admin/events') ? activeLinkClass : inactiveLinkClass)}
                     onClick={() => setOpen(false)}
                   >
                     Модерация событий
                   </Link>
                   <Link
                     href="/admin/users"
-                    className={cn(
-                      linkClass,
-                      isActive('/admin/users')
-                        ? 'bg-purple-100 text-purple-900 font-bold border border-purple-200'
-                        : 'text-slate-700 hover:bg-slate-100',
-                    )}
+                    className={cn(linkClass, isActive('/admin/users') ? activeLinkClass : inactiveLinkClass)}
                     onClick={() => setOpen(false)}
                   >
                     Пользователи
@@ -143,20 +116,13 @@ export function MobileMenu({
                 </>
               )}
 
-              {user.role === 'participant' && (
-                <Link
-                  href="/my-tickets"
-                  className={cn(
-                    linkClass,
-                    isActive('/my-tickets')
-                      ? 'bg-indigo-50 text-indigo-700 font-bold border border-indigo-100'
-                      : 'text-slate-700 hover:bg-slate-100',
-                  )}
-                  onClick={() => setOpen(false)}
-                >
-                  Мои билеты
-                </Link>
-              )}
+              <Link
+                href="/my-tickets"
+                className={cn(linkClass, isActive('/my-tickets') ? activeLinkClass : inactiveLinkClass)}
+                onClick={() => setOpen(false)}
+              >
+                Мои билеты
+              </Link>
 
               <Link
                 href="/profile"

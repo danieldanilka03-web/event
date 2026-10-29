@@ -45,7 +45,7 @@ export default async function OrganizerDashboard() {
         />
       </div>
 
-      <div className="mt-8 overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-xs">
+      <div className="mt-8 overflow-x-auto rounded-2xl border border-slate-200/80 bg-white shadow-2xs">
         <div className="flex items-center justify-between border-b border-slate-100 p-5">
           <h2 className="text-base font-bold tracking-tight text-slate-900">Последние мероприятия</h2>
           <Link href="/organizer/events" className="text-xs font-semibold text-indigo-600 hover:underline">

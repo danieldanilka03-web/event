@@ -18,16 +18,16 @@ export function NavLinks({ role }: { role?: 'participant' | 'organizer' | 'admin
   const baseStyle =
     'rounded-xl px-3.5 py-2 text-sm transition-all duration-150';
 
+  const activeClass =
+    'font-semibold text-indigo-700 bg-indigo-50 border border-indigo-200/80 shadow-2xs';
+  const inactiveClass =
+    'font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100/70';
+
   return (
     <nav className="hidden items-center gap-1 sm:flex" aria-label="Основная навигация">
       <Link
         href="/"
-        className={cn(
-          baseStyle,
-          isActive('/')
-            ? 'font-bold text-indigo-700 bg-indigo-50 border border-indigo-100 shadow-2xs'
-            : 'font-medium text-slate-600 hover:text-indigo-600 hover:bg-slate-100/70',
-        )}
+        className={cn(baseStyle, isActive('/') ? activeClass : inactiveClass)}
       >
         Мероприятия
       </Link>
@@ -36,23 +36,13 @@ export function NavLinks({ role }: { role?: 'participant' | 'organizer' | 'admin
         <>
           <Link
             href="/organizer"
-            className={cn(
-              baseStyle,
-              isActive('/organizer')
-                ? 'font-bold text-blue-900 bg-blue-100 border border-blue-200/90 shadow-2xs'
-                : 'font-medium text-slate-600 hover:text-blue-700 hover:bg-slate-100/70',
-            )}
+            className={cn(baseStyle, isActive('/organizer') ? activeClass : inactiveClass)}
           >
             Дашборд
           </Link>
           <Link
             href="/organizer/events"
-            className={cn(
-              baseStyle,
-              isActive('/organizer/events')
-                ? 'font-bold text-blue-900 bg-blue-100 border border-blue-200/90 shadow-2xs'
-                : 'font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100/70',
-            )}
+            className={cn(baseStyle, isActive('/organizer/events') ? activeClass : inactiveClass)}
           >
             Мои мероприятия
           </Link>
@@ -74,48 +64,31 @@ export function NavLinks({ role }: { role?: 'participant' | 'organizer' | 'admin
         <>
           <Link
             href="/admin"
-            className={cn(
-              baseStyle,
-              isActive('/admin')
-                ? 'font-bold text-purple-900 bg-purple-100 border border-purple-200/90 shadow-2xs'
-                : 'font-medium text-slate-600 hover:text-purple-700 hover:bg-slate-100/70',
-            )}
+            className={cn(baseStyle, isActive('/admin') ? activeClass : inactiveClass)}
           >
-            Админ-панель
+            Статистика
           </Link>
           <Link
             href="/admin/events"
-            className={cn(
-              baseStyle,
-              isActive('/admin/events')
-                ? 'font-bold text-purple-900 bg-purple-100 border border-purple-200/90 shadow-2xs'
-                : 'font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100/70',
-            )}
+            className={cn(baseStyle, isActive('/admin/events') ? activeClass : inactiveClass)}
           >
             Модерация
           </Link>
           <Link
             href="/admin/users"
-            className={cn(
-              baseStyle,
-              isActive('/admin/users')
-                ? 'font-bold text-purple-900 bg-purple-100 border border-purple-200/90 shadow-2xs'
-                : 'font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100/70',
-            )}
+            className={cn(baseStyle, isActive('/admin/users') ? activeClass : inactiveClass)}
           >
             Пользователи
           </Link>
         </>
       )}
 
-      {role === 'participant' && (
+      {role && (
         <Link
           href="/my-tickets"
           className={cn(
             baseStyle,
-            isActive('/my-tickets')
-              ? 'font-bold text-indigo-700 bg-indigo-50 border border-indigo-100 shadow-2xs'
-              : 'font-medium text-slate-600 hover:text-indigo-600 hover:bg-slate-100/70',
+            isActive('/my-tickets') ? activeClass : inactiveClass,
           )}
         >
           Мои билеты
