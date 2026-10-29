@@ -1,70 +1,90 @@
 import Link from 'next/link';
-import { CalendarDays, MapPin, Users, ArrowRight, Sparkles } from 'lucide-react';
+import { CalendarDays, MapPin, ArrowRight, Sparkles } from 'lucide-react';
 import type { EventWithMeta } from '@/server/db/queries';
 import { CATEGORY_GRADIENTS, type Category } from '@/shared/constants';
 import { formatEventDate, formatEventTime, seatsInfo } from '@/shared/format';
 import { Badge } from '@/components/ui/badge';
 
+function getMonthAndDay(date: Date) {
+  const d = new Date(date);
+  const day = d.getDate();
+  const month = d.toLocaleString('ru-RU', { month: 'short' }).toUpperCase().replace('.', '');
+  return { day, month };
+}
+
 export function EventCard({ event }: { event: EventWithMeta }) {
   const seats = seatsInfo(event.maxSeats, event.occupiedSeats);
   const gradient = CATEGORY_GRADIENTS[event.category as Category] ?? CATEGORY_GRADIENTS['Другое'];
+  const { day, month } = getMonthAndDay(event.startDate);
 
   return (
-    <article className="group flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-xs transition-all duration-200 hover:-translate-y-1 hover:shadow-lg hover:border-indigo-200">
-      {/* Верхняя шапка с градиентом */}
-      <div className={`relative h-28 sm:h-32 bg-gradient-to-br ${gradient} p-3.5 text-white overflow-hidden`}>
-        {/* Декоративный узор */}
+    <article className="group relative flex h-full flex-col overflow-hidden rounded-3xl border border-slate-200/80 bg-white/95 shadow-xs transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl hover:shadow-indigo-500/10 hover:border-indigo-200">
+      {/* Шапка карточки / визуальный постер */}
+      <div className={`relative h-36 bg-gradient-to-br ${gradient} p-4 text-white overflow-hidden`}>
+        {/* Фоновый узор сетки */}
         <div
-          className="absolute inset-0 opacity-15 mix-blend-overlay pointer-events-none"
+          className="absolute inset-0 opacity-20 mix-blend-overlay pointer-events-none"
           style={{
             backgroundImage:
               'radial-gradient(circle at 15px 15px, white 2%, transparent 0%), radial-gradient(circle at 45px 45px, white 2%, transparent 0%)',
-            backgroundSize: '60px 60px',
+            backgroundSize: '50px 50px',
           }}
         />
+        <div className="absolute -top-12 -right-12 h-36 w-36 rounded-full bg-white/15 blur-xl pointer-events-none" />
 
         <div className="relative z-10 flex items-start justify-between gap-2">
-          <span className="inline-flex items-center gap-1 rounded-full bg-white/20 px-2.5 py-0.5 text-[11px] font-bold text-white backdrop-blur-md border border-white/25 shadow-2xs">
-            <Sparkles className="h-3 w-3" />
-            {event.category}
-          </span>
+          {/* Дата-стикер (день + месяц) */}
+          <div className="flex flex-col items-center justify-center rounded-2xl bg-white/95 px-3 py-1.5 text-slate-900 shadow-md backdrop-blur-md">
+            <span className="text-[10px] font-black uppercase tracking-wider text-rose-600 leading-none">
+              {month}
+            </span>
+            <span className="text-lg font-black leading-none mt-0.5">{day}</span>
+          </div>
 
-          <span className="inline-flex items-center rounded-lg bg-black/25 px-2 py-0.5 text-[11px] font-semibold text-white backdrop-blur-md border border-white/10">
-            {formatEventDate(event.startDate)}
+          {/* Бейдж категории */}
+          <span className="inline-flex items-center gap-1 rounded-full bg-black/25 px-3 py-1 text-xs font-bold text-white backdrop-blur-md border border-white/20 shadow-xs">
+            <Sparkles className="h-3 w-3 text-amber-300" />
+            {event.category}
           </span>
         </div>
       </div>
 
       {/* Тело карточки */}
-      <div className="flex flex-1 flex-col p-4 sm:p-5">
-        <h3 className="line-clamp-2 text-base sm:text-lg font-bold text-slate-900 group-hover:text-indigo-600 transition-colors leading-snug">
+      <div className="flex flex-1 flex-col p-5">
+        <h3 className="line-clamp-2 text-base sm:text-lg font-black tracking-tight text-slate-900 group-hover:text-indigo-600 transition-colors leading-snug">
           <Link href={`/events/${event.id}`} className="focus:outline-none">
             {event.title}
           </Link>
         </h3>
 
-        <div className="mt-3 space-y-1.5 text-xs text-slate-500">
-          <p className="flex items-center gap-1.5 font-medium text-slate-600">
-            <CalendarDays className="h-3.5 w-3.5 text-indigo-500 shrink-0" aria-hidden />
-            {formatEventDate(event.startDate)}, {formatEventTime(event.startDate)}
+        <div className="mt-3.5 space-y-2 text-xs">
+          <p className="flex items-center gap-2 font-semibold text-slate-700">
+            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
+              <CalendarDays className="h-3.5 w-3.5" aria-hidden />
+            </span>
+            <span>
+              {formatEventDate(event.startDate)} в {formatEventTime(event.startDate)}
+            </span>
           </p>
-          <p className="flex items-center gap-1.5 text-slate-500">
-            <MapPin className="h-3.5 w-3.5 text-emerald-500 shrink-0" aria-hidden />
-            <span className="line-clamp-1">{event.location}</span>
+          <p className="flex items-center gap-2 text-slate-500">
+            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600">
+              <MapPin className="h-3.5 w-3.5" aria-hidden />
+            </span>
+            <span className="truncate">{event.location}</span>
           </p>
         </div>
 
         {/* Подвал карточки */}
         <div className="mt-auto flex items-center justify-between gap-2 pt-4 border-t border-slate-100">
-          <Badge tone={seats.tone}>
-            <Users className="h-3 w-3" aria-hidden />
+          <Badge tone={seats.tone} withDot>
             {seats.label}
           </Badge>
+
           <Link
             href={`/events/${event.id}`}
-            className="inline-flex items-center gap-1 text-xs font-bold text-indigo-600 group-hover:text-indigo-700 group-hover:translate-x-0.5 transition-all"
+            className="inline-flex items-center gap-1 rounded-xl bg-slate-50 px-3 py-1.5 text-xs font-bold text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-all duration-200"
           >
-            Подробнее <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+            Билеты <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" aria-hidden />
           </Link>
         </div>
       </div>

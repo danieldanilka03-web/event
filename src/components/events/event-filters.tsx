@@ -43,7 +43,7 @@ export function EventFilters({ query }: { query: CatalogQuery }) {
   return (
     <aside aria-label="Фильтры каталога" className="lg:sticky lg:top-20 lg:self-start">
       <div className="hidden lg:block">
-        <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs">
+        <div className="rounded-3xl border border-slate-200/80 bg-white/95 p-6 shadow-xs">
           <h2 className="mb-4 flex items-center gap-2 text-base font-bold tracking-tight text-slate-900">
             <Filter className="h-4 w-4 text-indigo-600" aria-hidden /> Фильтры
           </h2>

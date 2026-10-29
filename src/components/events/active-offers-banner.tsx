@@ -47,7 +47,7 @@ function OfferCard({ offer }: { offer: UserActiveOffer }) {
   }, [offer.expiresAt, router]);
 
   return (
-    <div className="rounded-2xl border-2 border-emerald-500/80 bg-gradient-to-r from-emerald-50/90 via-teal-50/80 to-emerald-50/90 p-5 shadow-xs">
+    <div className="rounded-3xl border-2 border-emerald-500/80 bg-gradient-to-r from-emerald-50/90 via-teal-50/80 to-emerald-50/90 p-6 shadow-md">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="space-y-1">
           <div className="flex items-center gap-2">

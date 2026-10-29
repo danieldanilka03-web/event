@@ -224,7 +224,7 @@ export function HallPicker({
         </div>
       )}
 
-      <div className="overflow-x-auto rounded-2xl border border-slate-200/80 bg-slate-50/50 p-4 shadow-inner">
+      <div className="overflow-x-auto rounded-3xl border border-slate-200/90 bg-slate-50/70 p-6 shadow-inner">
         <svg
           viewBox={`0 0 ${width} ${height}`}
           className="mx-auto h-auto w-full max-w-[560px]"

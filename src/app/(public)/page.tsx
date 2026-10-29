@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { CalendarDays, MapPin, Ticket, ArrowRight, Sparkles, Search, PlusCircle } from 'lucide-react';
+import { CalendarDays, MapPin, Ticket, ArrowRight, Sparkles, Search, PlusCircle, CheckCircle2 } from 'lucide-react';
 import { getCatalog } from '@/server/db/queries';
 import { catalogQuerySchema } from '@/shared/validators';
 import { CATEGORIES } from '@/shared/constants';
@@ -41,28 +41,28 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
 
   return (
     <>
-      {/* Главный Hero-блок */}
+      {/* Главный Hero-блок (Luma & Apple Event Aesthetic) */}
       <section className="relative overflow-hidden bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-900 py-16 sm:py-24 text-white">
         {/* Фоновые градиентные сферы */}
-        <div className="absolute -top-32 -left-32 h-96 w-96 rounded-full bg-indigo-600/25 blur-3xl pointer-events-none" />
-        <div className="absolute top-1/2 -right-32 h-96 w-96 rounded-full bg-violet-600/20 blur-3xl pointer-events-none" />
+        <div className="absolute -top-40 -left-40 h-[450px] w-[450px] rounded-full bg-indigo-600/20 blur-[100px] pointer-events-none" />
+        <div className="absolute top-1/2 -right-40 h-[450px] w-[450px] rounded-full bg-violet-600/20 blur-[100px] pointer-events-none" />
 
         <div className="relative mx-auto w-full max-w-6xl px-4 sm:px-6">
           <div className="max-w-3xl">
-            <div className="inline-flex items-center gap-2 rounded-full border border-indigo-400/30 bg-indigo-500/10 px-3.5 py-1 text-xs font-semibold text-indigo-300 backdrop-blur-md shadow-xs mb-5">
-              <Sparkles className="h-3.5 w-3.5 text-indigo-400" />
-              Платформа бронирования билетов & мероприятий
+            <div className="inline-flex items-center gap-2 rounded-full border border-indigo-400/30 bg-indigo-500/15 px-3.5 py-1 text-xs font-bold text-indigo-200 backdrop-blur-md shadow-xs mb-6">
+              <Sparkles className="h-3.5 w-3.5 text-amber-300" />
+              Новое поколение бронирования билетов & мероприятий
             </div>
 
-            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white leading-tight">
-              События, на которые <br className="hidden sm:inline" />
-              <span className="bg-gradient-to-r from-indigo-300 via-indigo-100 to-white bg-clip-text text-transparent">
-                хочется попасть
+            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white leading-[1.1]">
+              События, которые <br className="hidden sm:inline" />
+              <span className="bg-gradient-to-r from-indigo-200 via-white to-indigo-300 bg-clip-text text-transparent">
+                вдохновляют и объединяют
               </span>
             </h1>
 
-            <p className="mt-4 max-w-xl text-base sm:text-lg text-slate-300 leading-relaxed">
-              Конференции, концерты, выставки и мастер-классы. Выбирайте места на интерактивной схеме зала и бронируйте билеты за секунды.
+            <p className="mt-5 max-w-xl text-base sm:text-lg text-slate-300 leading-relaxed font-normal">
+              Конференции, концерты, выставки и воркшопы. Выбирайте места на интерактивной схеме зала и получайте защищённый электронный билет с QR-кодом за секунды.
             </p>
 
             {/* Поисковая форма */}
@@ -73,14 +73,14 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
                   type="search"
                   name="q"
                   defaultValue={query.q ?? ''}
-                  placeholder="Поиск по названию или теме…"
+                  placeholder="Поиск событий по названию, теме или городу…"
                   aria-label="Поиск мероприятий"
-                  className="h-12 w-full rounded-2xl border border-white/10 bg-white/10 pl-11 pr-4 text-[15px] text-white placeholder:text-slate-400 backdrop-blur-md focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:bg-white/15 transition-all"
+                  className="h-12 w-full rounded-2xl border border-white/15 bg-white/10 pl-11 pr-4 text-sm text-white placeholder:text-slate-400 backdrop-blur-md focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:bg-white/15 transition-all"
                 />
               </div>
               <button
                 type="submit"
-                className="h-12 shrink-0 rounded-2xl bg-indigo-600 px-6 font-semibold text-white shadow-md shadow-indigo-500/25 hover:bg-indigo-500 active:scale-[0.98] transition-all"
+                className="h-12 shrink-0 rounded-2xl bg-indigo-600 px-6 text-sm font-bold text-white shadow-lg shadow-indigo-600/30 hover:bg-indigo-500 active:scale-[0.98] transition-all cursor-pointer"
               >
                 Найти события
               </button>
@@ -88,14 +88,14 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
 
             {/* Быстрые категории */}
             <div className="mt-5 flex flex-wrap items-center gap-2">
-              <span className="text-xs font-medium text-slate-400 mr-1">Популярное:</span>
+              <span className="text-xs font-semibold text-slate-400 mr-1">Категории:</span>
               {CATEGORIES.slice(0, 5).map((cat) => (
                 <Link
                   key={cat}
                   href={`/?category=${encodeURIComponent(cat)}`}
-                  className={`rounded-full px-3 py-1 text-xs font-semibold backdrop-blur-md border transition-all ${
+                  className={`rounded-full px-3 py-1 text-xs font-bold backdrop-blur-md border transition-all ${
                     query.category === cat
-                      ? 'bg-indigo-600 border-indigo-400 text-white'
+                      ? 'bg-indigo-600 border-indigo-400 text-white shadow-xs'
                       : 'bg-white/5 border-white/10 text-slate-300 hover:bg-white/15 hover:text-white'
                   }`}
                 >
@@ -104,19 +104,25 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
               ))}
             </div>
 
-            {/* Метрики */}
-            <div className="mt-8 flex flex-wrap gap-5 text-xs sm:text-sm text-slate-400 pt-6 border-t border-white/10">
-              <span className="inline-flex items-center gap-1.5 font-medium text-slate-300">
-                <CalendarDays className="h-4 w-4 text-indigo-400" aria-hidden />
-                <strong className="text-white">{catalog.total}</strong> активных событий
+            {/* Метрики платформы */}
+            <div className="mt-10 flex flex-wrap gap-6 text-xs sm:text-sm text-slate-400 pt-6 border-t border-white/10">
+              <span className="inline-flex items-center gap-2 font-medium text-slate-300">
+                <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-indigo-500/20 text-indigo-400">
+                  <CalendarDays className="h-3.5 w-3.5" aria-hidden />
+                </span>
+                <strong className="text-white font-bold">{catalog.total}</strong> активных событий
               </span>
-              <span className="inline-flex items-center gap-1.5 font-medium text-slate-300">
-                <Ticket className="h-4 w-4 text-emerald-400" aria-hidden />
+              <span className="inline-flex items-center gap-2 font-medium text-slate-300">
+                <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-emerald-500/20 text-emerald-400">
+                  <Ticket className="h-3.5 w-3.5" aria-hidden />
+                </span>
                 Электронные билеты с QR
               </span>
-              <span className="inline-flex items-center gap-1.5 font-medium text-slate-300">
-                <MapPin className="h-4 w-4 text-amber-400" aria-hidden />
-                Онлайн & офлайн залы
+              <span className="inline-flex items-center gap-2 font-medium text-slate-300">
+                <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-amber-500/20 text-amber-400">
+                  <CheckCircle2 className="h-3.5 w-3.5" aria-hidden />
+                </span>
+                Схема зала и лист ожидания
               </span>
             </div>
           </div>
@@ -124,8 +130,8 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
       </section>
 
       {/* Основной контент каталога */}
-      <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6">
-        <div className="grid gap-8 lg:grid-cols-[260px_1fr]">
+      <div className="mx-auto w-full max-w-6xl px-4 py-12 sm:px-6">
+        <div className="grid gap-8 lg:grid-cols-[280px_1fr]">
           <EventFilters query={query} />
 
           <section aria-label="Каталог мероприятий">
@@ -133,7 +139,7 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
               {dbError ? (
                 <EmptyState
                   title="Каталог временно недоступен"
-                  description="Не удалось подключиться к базе данных. Проверьте параметры подключения к базе данных."
+                  description="Не удалось подключиться к базе данных. Проверьте параметры подключения."
                 />
               ) : catalog.items.length === 0 ? (
                 <EmptyState
@@ -151,15 +157,15 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
                 />
               ) : (
                 <>
-                  <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+                  <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
                     {catalog.items.map((event) => (
                       <EventCard key={event.id} event={event} />
                     ))}
                   </div>
 
                   {catalog.totalPages > 1 && (
-                    <div className="mt-10 flex items-center justify-between border-t border-slate-200/80 pt-6">
-                      <p className="text-xs font-medium text-slate-500">
+                    <div className="mt-12 flex items-center justify-between border-t border-slate-200/80 pt-6">
+                      <p className="text-xs font-semibold text-slate-500">
                         Страница {query.page} из {catalog.totalPages}
                       </p>
                       <Pagination page={query.page} totalPages={catalog.totalPages} params={query} />
@@ -169,22 +175,22 @@ export default async function HomePage({ searchParams }: { searchParams: SearchP
               )}
 
               {/* Блок для организаторов */}
-              <div className="mt-12 rounded-3xl border border-slate-200/80 bg-gradient-to-br from-indigo-50/70 via-white to-slate-50 p-6 sm:p-8 shadow-xs">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  <div className="space-y-1">
-                    <div className="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-700 uppercase tracking-wider">
+              <div className="mt-14 rounded-3xl border border-indigo-100 bg-gradient-to-br from-indigo-50/80 via-white to-slate-50 p-6 sm:p-8 shadow-xs">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+                  <div className="space-y-1.5">
+                    <div className="inline-flex items-center gap-1.5 text-xs font-black text-indigo-700 uppercase tracking-wider">
                       <PlusCircle className="h-3.5 w-3.5" />
                       Для организаторов
                     </div>
-                    <h2 className="text-xl font-bold tracking-tight text-slate-900">
+                    <h2 className="text-xl sm:text-2xl font-black tracking-tight text-slate-900">
                       Хотите организовать своё событие?
                     </h2>
-                    <p className="text-sm text-slate-600 max-w-xl">
-                      Создайте мероприятие, настройте схему зала и лимиты мест, открывайте предзапись и управляйте участниками в панели организатора.
+                    <p className="text-sm text-slate-600 max-w-xl leading-relaxed">
+                      Создавайте мероприятия, настраивайте интерактивную схему зала, управляйте бронями и очередью листа ожидания через личный кабинет.
                     </p>
                   </div>
                   <div className="shrink-0">
-                    <ButtonLink href="/organizer/events/new" size="md" className="font-semibold shadow-xs">
+                    <ButtonLink href="/organizer/events/new" size="md" className="font-bold shadow-sm">
                       Создать событие <ArrowRight className="h-4 w-4 ml-1" />
                     </ButtonLink>
                   </div>

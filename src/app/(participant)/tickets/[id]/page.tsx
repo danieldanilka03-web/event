@@ -39,7 +39,7 @@ export default async function TicketPage({ params }: { params: Promise<{ id: str
         <PrintButton />
       </div>
 
-      <div className="print-area overflow-hidden rounded-3xl border border-slate-200/90 bg-white shadow-lg">
+      <div className="print-area relative overflow-hidden rounded-3xl border border-slate-200/90 bg-white shadow-xl ticket-edge-left ticket-edge-right">
         {/* Шапка билета */}
         <div className="relative overflow-hidden bg-gradient-to-r from-indigo-600 via-indigo-700 to-violet-700 px-6 sm:px-8 py-6 text-white">
           <div className="flex items-center justify-between gap-3">

@@ -35,17 +35,19 @@ export function DashboardShell({
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6">
-      <div className="mb-6 flex flex-wrap items-start justify-between gap-4 border-b border-slate-200/80 pb-6">
+      <div className="mb-8 flex flex-wrap items-center justify-between gap-4 border-b border-slate-200/80 pb-6">
         <div>
-          <h1 className="text-2xl font-black tracking-tight text-slate-900 sm:text-3xl">{title}</h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl font-black tracking-tight text-slate-900 sm:text-3xl">{title}</h1>
+          </div>
           {subtitle && <p className="mt-1 text-sm text-slate-500 font-medium">{subtitle}</p>}
         </div>
-        {actions}
+        {actions && <div className="flex items-center gap-2.5">{actions}</div>}
       </div>
 
-      <div className="grid gap-8 md:grid-cols-[220px_1fr]">
-        <nav aria-label="Разделы панели" className="md:sticky md:top-20 md:self-start">
-          <ul className="flex gap-1.5 overflow-x-auto md:flex-col md:overflow-visible p-1.5 rounded-2xl bg-slate-100/70 border border-slate-200/60">
+      <div className="grid gap-8 md:grid-cols-[230px_1fr]">
+        <nav aria-label="Разделы панели" className="md:sticky md:top-24 md:self-start">
+          <ul className="flex gap-1.5 overflow-x-auto md:flex-col md:overflow-visible p-2 rounded-3xl bg-slate-100/80 border border-slate-200/70 shadow-2xs">
             {items.map((item) => {
               const active = isItemActive(item.href);
               return (
@@ -53,14 +55,16 @@ export function DashboardShell({
                   <Link
                     href={item.href}
                     className={cn(
-                      'flex items-center gap-2.5 whitespace-nowrap rounded-xl px-3.5 py-2.5 text-sm font-semibold transition-all',
+                      'flex items-center gap-3 whitespace-nowrap rounded-2xl px-4 py-3 text-sm font-bold transition-all duration-150',
                       active
-                        ? 'bg-white text-indigo-700 font-bold shadow-xs border border-slate-200/80'
-                        : 'text-slate-600 hover:bg-white/80 hover:text-slate-900',
+                        ? 'bg-white text-indigo-700 shadow-sm border border-slate-200/80'
+                        : 'text-slate-600 hover:bg-white/70 hover:text-slate-900',
                     )}
                   >
-                    <span className={active ? 'text-indigo-600' : 'text-slate-400'}>{item.icon}</span>
-                    {item.label}
+                    <span className={cn('shrink-0 transition-colors', active ? 'text-indigo-600' : 'text-slate-400')}>
+                      {item.icon}
+                    </span>
+                    <span>{item.label}</span>
                   </Link>
                 </li>
               );
@@ -68,7 +72,7 @@ export function DashboardShell({
           </ul>
         </nav>
 
-        <div className="min-w-0">{children}</div>
+        <div className="min-w-0 space-y-6">{children}</div>
       </div>
     </div>
   );
@@ -86,22 +90,41 @@ export function MetricCard({
   tone?: 'primary' | 'accent' | 'success';
 }) {
   const tones = {
-    primary: 'bg-indigo-50 text-indigo-600 border-indigo-100',
-    accent: 'bg-amber-50 text-amber-600 border-amber-100',
-    success: 'bg-emerald-50 text-emerald-600 border-emerald-100',
+    primary: {
+      icon: 'bg-indigo-50 text-indigo-600 border-indigo-100',
+      border: 'hover:border-indigo-200',
+    },
+    accent: {
+      icon: 'bg-amber-50 text-amber-600 border-amber-100',
+      border: 'hover:border-amber-200',
+    },
+    success: {
+      icon: 'bg-emerald-50 text-emerald-600 border-emerald-100',
+      border: 'hover:border-emerald-200',
+    },
   } as const;
 
+  const style = tones[tone];
+
   return (
-    <div className="flex items-center gap-4 rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs transition-shadow hover:shadow-md">
+    <div
+      className={cn(
+        'group flex items-center gap-4.5 rounded-3xl border border-slate-200/80 bg-white/90 p-5 shadow-xs transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md',
+        style.border,
+      )}
+    >
       <span
-        className={`flex h-12 w-12 items-center justify-center rounded-xl border ${tones[tone]} shadow-2xs`}
+        className={cn(
+          'flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border shadow-2xs transition-transform duration-200 group-hover:scale-105',
+          style.icon,
+        )}
         aria-hidden
       >
         {icon}
       </span>
       <div className="min-w-0">
-        <p className="text-2xl font-black text-slate-900 tracking-tight">{value}</p>
-        <p className="text-xs leading-tight text-slate-500 font-medium mt-0.5">{label}</p>
+        <p className="text-2xl font-black text-slate-900 tracking-tight leading-none">{value}</p>
+        <p className="text-xs font-semibold text-slate-500 mt-1 leading-tight">{label}</p>
       </div>
     </div>
   );

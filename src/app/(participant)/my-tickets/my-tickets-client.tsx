@@ -111,12 +111,12 @@ export function MyTicketsClient({ tickets }: { tickets: TicketRow[] }) {
             return (
               <li
                 key={t.id}
-                className="group relative overflow-hidden rounded-2xl border border-slate-200/90 bg-white p-5 shadow-xs transition-all hover:shadow-md hover:border-indigo-200"
+                className="group relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white/95 p-6 shadow-xs transition-all duration-200 hover:shadow-lg hover:border-indigo-200"
               >
                 {/* Цветная полоска категории слева */}
-                <div className={`absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b ${gradient}`} />
+                <div className={`absolute left-0 top-0 bottom-0 w-2 bg-gradient-to-b ${gradient}`} />
 
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between pl-1">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between pl-2">
                   <div className="min-w-0 space-y-1.5">
                     <div className="flex flex-wrap items-center gap-2">
                       <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold ${catStyle.bg} ${catStyle.text} border ${catStyle.border}`}>
