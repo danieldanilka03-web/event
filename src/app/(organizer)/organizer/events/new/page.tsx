@@ -8,7 +8,7 @@ export const metadata: Metadata = { title: 'Создание мероприят�
 export const dynamic = 'force-dynamic';
 
 export default async function NewEventPage() {
-  await requireRole('organizer', 'admin');
+  await requireRole('organizer');
 
   return (
     <DashboardShell

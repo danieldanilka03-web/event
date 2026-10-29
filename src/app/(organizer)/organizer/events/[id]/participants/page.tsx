@@ -24,13 +24,12 @@ function initials(name: string): string {
 
 export default async function ParticipantsPage({ params }: { params: Promise<{ id: string }> }) {
   const user = await requireUser();
-  if (user.role !== 'organizer' && user.role !== 'admin') notFound();
+  if (user.role !== 'organizer') notFound();
 
   const { id } = await params;
   const event = await getEventById(id);
   // Организатор видит участников только своих мероприятий.
-  if (!event) notFound();
-  if (user.role !== 'admin' && event.organizerId !== user.id) notFound();
+  if (!event || event.organizerId !== user.id) notFound();
 
   const participants = await getEventParticipants(id);
   const active = participants.filter((p) => p.status === 'active');

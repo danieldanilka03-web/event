@@ -83,7 +83,7 @@ export function NavLinks({ role }: { role?: 'participant' | 'organizer' | 'admin
         </>
       )}
 
-      {role && (
+      {role === 'participant' && (
         <Link
           href="/my-tickets"
           className={cn(

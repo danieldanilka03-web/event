@@ -105,17 +105,17 @@ export function UserMenu({ name, role }: { name: string; role: 'participant' | '
                   href="/admin"
                   role="menuitem"
                   onClick={() => setOpen(false)}
-                  className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-medium text-purple-700 hover:bg-purple-50 transition-colors"
+                  className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-semibold text-purple-700 hover:bg-purple-50 transition-colors"
                 >
                   <Shield className="h-4 w-4 text-purple-600" aria-hidden /> Админ-панель
                 </Link>
                 <Link
-                  href="/organizer"
+                  href="/admin/events"
                   role="menuitem"
                   onClick={() => setOpen(false)}
                   className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
                 >
-                  <LayoutDashboard className="h-4 w-4 text-slate-500" aria-hidden /> Панель организатора
+                  <Calendar className="h-4 w-4 text-slate-500" aria-hidden /> Модерация событий
                 </Link>
               </>
             )}

@@ -14,12 +14,11 @@ export const dynamic = 'force-dynamic';
 
 export default async function WaitlistPage({ params }: { params: Promise<{ id: string }> }) {
   const user = await requireUser();
-  if (user.role !== 'organizer' && user.role !== 'admin') notFound();
+  if (user.role !== 'organizer') notFound();
 
   const { id } = await params;
   const event = await getEventById(id);
-  if (!event) notFound();
-  if (user.role !== 'admin' && event.organizerId !== user.id) notFound();
+  if (!event || event.organizerId !== user.id) notFound();
 
   const [stats, rawEntries] = await Promise.all([
     getEventWaitlistStats(id),

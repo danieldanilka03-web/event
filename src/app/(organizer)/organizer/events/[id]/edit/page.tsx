@@ -10,7 +10,7 @@ export const metadata: Metadata = { title: 'Редактирование мер�
 export const dynamic = 'force-dynamic';
 
 export default async function EditEventPage({ params }: { params: Promise<{ id: string }> }) {
-  await requireRole('organizer', 'admin');
+  await requireRole('organizer');
   const { id } = await params;
   const event = await getOwnedEventForEdit(id);
   if (!event) notFound();

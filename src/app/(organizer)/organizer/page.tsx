@@ -14,7 +14,7 @@ export const metadata: Metadata = { title: 'Панель организатор�
 export const dynamic = 'force-dynamic';
 
 export default async function OrganizerDashboard() {
-  const user = await requireRole('organizer', 'admin');
+  const user = await requireRole('organizer');
   const metrics = await getOrganizerMetrics(user.id);
   const events = await getOrganizerEvents(user.id, 1, '');
 

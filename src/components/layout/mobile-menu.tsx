@@ -116,13 +116,15 @@ export function MobileMenu({
                 </>
               )}
 
-              <Link
-                href="/my-tickets"
-                className={cn(linkClass, isActive('/my-tickets') ? activeLinkClass : inactiveLinkClass)}
-                onClick={() => setOpen(false)}
-              >
-                Мои билеты
-              </Link>
+              {user.role === 'participant' && (
+                <Link
+                  href="/my-tickets"
+                  className={cn(linkClass, isActive('/my-tickets') ? activeLinkClass : inactiveLinkClass)}
+                  onClick={() => setOpen(false)}
+                >
+                  Мои билеты
+                </Link>
+              )}
 
               <Link
                 href="/profile"

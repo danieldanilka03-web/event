@@ -17,7 +17,7 @@ export default async function OrganizerEventsPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const user = await requireRole('organizer', 'admin');
+  const user = await requireRole('organizer');
   const sp = await searchParams;
   const page = Math.max(1, Number(Array.isArray(sp.page) ? sp.page[0] : sp.page ?? 1) || 1);
   const search = String(Array.isArray(sp.q) ? sp.q[0] : sp.q ?? '').trim();
