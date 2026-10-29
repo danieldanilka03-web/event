@@ -3,7 +3,7 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { LogOut, User, Shield, LayoutDashboard, ChevronDown, Ticket, Calendar } from 'lucide-react';
+import { LogOut, User, Shield, LayoutDashboard, ChevronDown, Ticket } from 'lucide-react';
 import { logoutAction } from '@/server/actions/auth';
 import { ROLE_LABEL } from '@/shared/constants';
 
@@ -79,45 +79,25 @@ export function UserMenu({ name, role }: { name: string; role: 'participant' | '
 
           <div className="space-y-0.5">
             {role === 'organizer' && (
-              <>
-                <Link
-                  href="/organizer"
-                  role="menuitem"
-                  onClick={() => setOpen(false)}
-                  className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-medium text-blue-700 hover:bg-blue-50 transition-colors"
-                >
-                  <LayoutDashboard className="h-4 w-4 text-blue-600" aria-hidden /> Панель организатора
-                </Link>
-                <Link
-                  href="/organizer/events"
-                  role="menuitem"
-                  onClick={() => setOpen(false)}
-                  className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
-                >
-                  <Calendar className="h-4 w-4 text-slate-500" aria-hidden /> Мои мероприятия
-                </Link>
-              </>
+              <Link
+                href="/organizer"
+                role="menuitem"
+                onClick={() => setOpen(false)}
+                className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-semibold text-blue-700 hover:bg-blue-50 transition-colors"
+              >
+                <LayoutDashboard className="h-4 w-4 text-blue-600" aria-hidden /> Панель организатора
+              </Link>
             )}
 
             {role === 'admin' && (
-              <>
-                <Link
-                  href="/admin"
-                  role="menuitem"
-                  onClick={() => setOpen(false)}
-                  className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-semibold text-purple-700 hover:bg-purple-50 transition-colors"
-                >
-                  <Shield className="h-4 w-4 text-purple-600" aria-hidden /> Админ-панель
-                </Link>
-                <Link
-                  href="/admin/events"
-                  role="menuitem"
-                  onClick={() => setOpen(false)}
-                  className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
-                >
-                  <Calendar className="h-4 w-4 text-slate-500" aria-hidden /> Модерация событий
-                </Link>
-              </>
+              <Link
+                href="/admin"
+                role="menuitem"
+                onClick={() => setOpen(false)}
+                className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-semibold text-purple-700 hover:bg-purple-50 transition-colors"
+              >
+                <Shield className="h-4 w-4 text-purple-600" aria-hidden /> Админ-панель
+              </Link>
             )}
 
             {role === 'participant' && (
@@ -125,7 +105,7 @@ export function UserMenu({ name, role }: { name: string; role: 'participant' | '
                 href="/my-tickets"
                 role="menuitem"
                 onClick={() => setOpen(false)}
-                className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-medium text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 transition-colors"
+                className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-semibold text-indigo-700 hover:bg-indigo-50 transition-colors"
               >
                 <Ticket className="h-4 w-4 text-indigo-600" aria-hidden /> Мои билеты
               </Link>

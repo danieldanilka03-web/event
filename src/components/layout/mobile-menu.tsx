@@ -60,17 +60,18 @@ export function MobileMenu({
           {user ? (
             <>
               {user.role === 'organizer' && (
-                <>
+                <div className="pt-2 border-t border-slate-100 flex flex-col gap-1">
+                  <p className="px-3.5 text-xs font-bold uppercase tracking-wider text-slate-400">Кабинет организатора</p>
                   <Link
                     href="/organizer"
-                    className={cn(linkClass, isActive('/organizer') ? activeLinkClass : inactiveLinkClass)}
+                    className={cn(linkClass, isActive('/organizer') && pathname === '/organizer' ? activeLinkClass : inactiveLinkClass)}
                     onClick={() => setOpen(false)}
                   >
-                    Дашборд организатора
+                    Дашборд
                   </Link>
                   <Link
                     href="/organizer/events"
-                    className={cn(linkClass, isActive('/organizer/events') ? activeLinkClass : inactiveLinkClass)}
+                    className={cn(linkClass, isActive('/organizer/events') && pathname !== '/organizer/events/new' ? activeLinkClass : inactiveLinkClass)}
                     onClick={() => setOpen(false)}
                   >
                     Мои мероприятия
@@ -80,40 +81,41 @@ export function MobileMenu({
                     className={cn(
                       linkClass,
                       isActive('/organizer/events/new')
-                        ? 'bg-indigo-600 text-white font-bold'
-                        : 'text-indigo-700 hover:bg-indigo-50 font-semibold',
+                        ? 'bg-blue-600 text-white font-bold'
+                        : 'text-blue-700 hover:bg-blue-50 font-semibold',
                     )}
                     onClick={() => setOpen(false)}
                   >
                     + Создать событие
                   </Link>
-                </>
+                </div>
               )}
 
               {user.role === 'admin' && (
-                <>
+                <div className="pt-2 border-t border-slate-100 flex flex-col gap-1">
+                  <p className="px-3.5 text-xs font-bold uppercase tracking-wider text-slate-400">Администрирование</p>
                   <Link
                     href="/admin"
-                    className={cn(linkClass, isActive('/admin') ? activeLinkClass : inactiveLinkClass)}
+                    className={cn(linkClass, pathname === '/admin' ? activeLinkClass : inactiveLinkClass)}
                     onClick={() => setOpen(false)}
                   >
                     Статистика
                   </Link>
                   <Link
                     href="/admin/events"
-                    className={cn(linkClass, isActive('/admin/events') ? activeLinkClass : inactiveLinkClass)}
+                    className={cn(linkClass, pathname.startsWith('/admin/events') ? activeLinkClass : inactiveLinkClass)}
                     onClick={() => setOpen(false)}
                   >
                     Модерация событий
                   </Link>
                   <Link
                     href="/admin/users"
-                    className={cn(linkClass, isActive('/admin/users') ? activeLinkClass : inactiveLinkClass)}
+                    className={cn(linkClass, pathname.startsWith('/admin/users') ? activeLinkClass : inactiveLinkClass)}
                     onClick={() => setOpen(false)}
                   >
                     Пользователи
                   </Link>
-                </>
+                </div>
               )}
 
               {user.role === 'participant' && (
@@ -126,18 +128,20 @@ export function MobileMenu({
                 </Link>
               )}
 
-              <Link
-                href="/profile"
-                className={cn(
-                  linkClass,
-                  isActive('/profile')
-                    ? 'bg-slate-100 text-slate-900 font-bold'
-                    : 'text-slate-700 hover:bg-slate-100',
-                )}
-                onClick={() => setOpen(false)}
-              >
-                Профиль
-              </Link>
+              <div className="pt-2 border-t border-slate-100 flex flex-col gap-1">
+                <Link
+                  href="/profile"
+                  className={cn(
+                    linkClass,
+                    isActive('/profile')
+                      ? 'bg-slate-100 text-slate-900 font-bold'
+                      : 'text-slate-700 hover:bg-slate-100',
+                  )}
+                  onClick={() => setOpen(false)}
+                >
+                  Профиль
+                </Link>
+              </div>
 
               <div className="pt-3 mt-2 border-t border-slate-100">
                 <p className="px-3 text-xs text-slate-400 font-medium mb-1">
