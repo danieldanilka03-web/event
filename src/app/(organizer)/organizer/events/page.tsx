@@ -36,7 +36,7 @@ export default async function OrganizerEventsPage({
       }
     >
       {/* Поисковая панель */}
-      <div className="mb-6 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-2xs">
+      <div className="mb-6 rounded-3xl border border-slate-200/80 bg-white/95 p-4 shadow-xs">
         <form className="flex flex-col sm:flex-row gap-2.5" action="/organizer/events" method="get" role="search">
           <div className="relative flex-1">
             <Search className="absolute left-3.5 top-3 h-4 w-4 text-slate-400" aria-hidden />

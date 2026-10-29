@@ -4,7 +4,6 @@ import * as React from 'react';
 import { useRouter } from 'next/navigation';
 import { Ban, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Select } from '@/components/ui/input';
 import { useToast } from '@/components/ui/toast';
 import { setUserRoleAction, toggleBlockAction } from '@/server/actions/admin';
 
@@ -16,41 +15,50 @@ type Row = {
   isBlocked: boolean;
 };
 
+function initials(name: string): string {
+  return name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((p) => p[0]?.toUpperCase() ?? '')
+    .join('');
+}
+
 function RoleSelect({ user, isSelf }: { user: Row; isSelf: boolean }) {
   const [isPending, startTransition] = React.useTransition();
   const router = useRouter();
   const toast = useToast();
-  const [roleValue, setRoleValue] = React.useState(user.role);
 
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  function handleChange(nextRole: Row['role']) {
     startTransition(async () => {
-      const result = await setUserRoleAction(null, { userId: user.id, role: roleValue });
+      const result = await setUserRoleAction(null, { userId: user.id, role: nextRole });
       if (result.ok) {
-        toast('Роль обновлена');
+        toast(`Роль пользователя изменена на «${nextRole === 'admin' ? 'Админ' : nextRole === 'organizer' ? 'Организатор' : 'Участник'}»`);
         router.refresh();
-      } else toast(result.error, 'danger');
+      } else {
+        toast(result.error, 'danger');
+      }
     });
   }
 
+  const roleStyles = {
+    admin: 'text-purple-700 bg-purple-50 border-purple-200',
+    organizer: 'text-blue-700 bg-blue-50 border-blue-200',
+    participant: 'text-slate-700 bg-slate-50 border-slate-200',
+  }[user.role];
+
   return (
-    <form onSubmit={handleSubmit} className="flex items-center gap-2">
-      <Select
-        name="role"
-        value={roleValue}
-        onChange={(e) => setRoleValue(e.target.value as Row['role'])}
-        disabled={isPending || isSelf}
-        aria-label={`Роль пользователя ${user.fullName}`}
-        className="h-9 w-36"
-      >
-        <option value="participant">Участник</option>
-        <option value="organizer">Организатор</option>
-        <option value="admin">Админ</option>
-      </Select>
-      <Button type="submit" size="sm" disabled={isPending || isSelf}>
-        {isPending ? '…' : 'Сменить'}
-      </Button>
-    </form>
+    <select
+      value={user.role}
+      disabled={isPending || isSelf}
+      onChange={(e) => handleChange(e.target.value as Row['role'])}
+      className={`h-8 rounded-xl border px-2.5 text-xs font-bold transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-100 ${roleStyles}`}
+      aria-label={`Роль пользователя ${user.fullName}`}
+    >
+      <option value="participant">Участник</option>
+      <option value="organizer">Организатор</option>
+      <option value="admin">Админ</option>
+    </select>
   );
 }
 
@@ -69,35 +77,30 @@ function BlockButton({ user, isSelf }: { user: Row; isSelf: boolean }) {
     });
   }
 
+  if (isSelf) {
+    return <span className="text-xs font-medium text-slate-400">—</span>;
+  }
+
   return (
     <Button
       type="button"
-      size="sm"
-      variant={user.isBlocked ? 'outline' : 'danger'}
-      disabled={isPending || isSelf}
+      size="xs"
+      variant={user.isBlocked ? 'outline' : 'dangerSoft'}
+      disabled={isPending}
       onClick={handleClick}
-      aria-label={user.isBlocked ? 'Разблокировать' : 'Заблокировать'}
+      className="h-8 px-2.5 font-bold"
     >
       {user.isBlocked ? (
         <>
-          <CheckCircle2 className="h-4 w-4" aria-hidden /> {isPending ? '…' : 'Разблокировать'}
+          <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 mr-1" /> Разблокировать
         </>
       ) : (
         <>
-          <Ban className="h-4 w-4" aria-hidden /> {isPending ? '…' : 'Заблокировать'}
+          <Ban className="h-3.5 w-3.5 mr-1" /> Заблокировать
         </>
       )}
     </Button>
   );
-}
-
-function initials(name: string): string {
-  return name
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((p) => p[0]?.toUpperCase() ?? '')
-    .join('');
 }
 
 export function AdminUsersClient({
@@ -135,11 +138,7 @@ export function AdminUsersClient({
               <RoleSelect user={user} isSelf={isSelf} />
             </td>
             <td className="px-4 py-3.5 whitespace-nowrap">
-              {isSelf ? (
-                <span className="text-xs font-medium text-slate-400">—</span>
-              ) : (
-                <BlockButton user={user} isSelf={isSelf} />
-              )}
+              <BlockButton user={user} isSelf={isSelf} />
             </td>
           </tr>
         );

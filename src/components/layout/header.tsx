@@ -10,7 +10,7 @@ export async function Header() {
 
   return (
     <header className="no-print sticky top-0 z-40 w-full border-b border-slate-200/70 bg-white/80 backdrop-blur-xl transition-all shadow-2xs">
-      <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
+      <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-4 px-4 sm:px-6">
         {/* Логотип и брендинг */}
         <Link href="/" className="group flex items-center gap-2.5 font-bold tracking-tight text-slate-900 transition-opacity hover:opacity-95">
           <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-tr from-indigo-600 via-indigo-600 to-violet-500 text-white shadow-md shadow-indigo-500/25 group-hover:scale-105 group-hover:shadow-indigo-500/40 transition-all duration-200">
