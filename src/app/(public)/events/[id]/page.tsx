@@ -20,6 +20,7 @@ import {
   type Category,
 } from '@/shared/constants';
 import { fillPercent, formatEventDate, formatEventTime, isPast, seatsInfo } from '@/shared/format';
+import { getEventImageUrl } from '@/shared/event-images';
 import { Badge, Progress } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { RegisterButton } from '@/components/events/register-button';
@@ -51,8 +52,8 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
   const seats = seatsInfo(event.maxSeats, event.occupiedSeats);
   const percent = fillPercent(event.maxSeats, event.occupiedSeats);
   const past = isPast(event.startDate);
-  const gradient = CATEGORY_GRADIENTS[event.category as Category] ?? CATEGORY_GRADIENTS['Другое'];
   const isCancelled = event.status === 'cancelled';
+  const imageUrl = getEventImageUrl(event);
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6">
@@ -70,20 +71,17 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
       <div className="grid gap-8 lg:grid-cols-[1fr_380px]">
         {/* Левая колонка */}
         <div className="space-y-6">
-          {/* Обложка события (Apple / Luma Aesthetic) */}
-          <div
-            className={`relative overflow-hidden rounded-3xl bg-gradient-to-br ${gradient} p-6 sm:p-10 text-white shadow-xl shadow-indigo-900/10`}
-          >
-            {/* Фоновый узор и подсветка */}
-            <div
-              className="absolute inset-0 opacity-20 mix-blend-overlay pointer-events-none"
-              style={{
-                backgroundImage:
-                  'radial-gradient(circle at 25px 25px, white 2%, transparent 0%), radial-gradient(circle at 75px 75px, white 2%, transparent 0%)',
-                backgroundSize: '100px 100px',
-              }}
+          {/* Обложка события с тематической фотографией */}
+          <div className="relative min-h-[260px] overflow-hidden rounded-3xl bg-slate-900 p-6 sm:p-10 text-white shadow-xl shadow-indigo-900/10 flex flex-col justify-between">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={imageUrl}
+              alt={event.title}
+              fetchPriority="high"
+              className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 hover:scale-105"
             />
-            <div className="absolute -top-24 -right-24 h-72 w-72 rounded-full bg-white/15 blur-3xl pointer-events-none" />
+            {/* Мягкий градиентный оверлей для идеального контраста */}
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/60 to-slate-900/40 pointer-events-none" />
 
             <div className="relative z-10 flex flex-wrap items-center justify-between gap-3">
               <span className="inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3.5 py-1 text-xs font-black tracking-wide text-white backdrop-blur-md border border-white/25 shadow-xs">
@@ -92,11 +90,11 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
               </span>
 
               <div className="flex flex-wrap items-center gap-2">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-black/25 px-3.5 py-1 text-xs font-semibold text-white/95 backdrop-blur-md border border-white/15">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-black/40 px-3.5 py-1 text-xs font-semibold text-white/95 backdrop-blur-md border border-white/15 shadow-xs">
                   <CalendarDays className="h-3.5 w-3.5 text-indigo-300" />
                   {formatEventDate(event.startDate)} в {formatEventTime(event.startDate)}
                 </span>
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-black/25 px-3.5 py-1 text-xs font-semibold text-white/95 backdrop-blur-md border border-white/15">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-black/40 px-3.5 py-1 text-xs font-semibold text-white/95 backdrop-blur-md border border-white/15 shadow-xs">
                   <MapPin className="h-3.5 w-3.5 text-emerald-300" />
                   {event.location}
                 </span>

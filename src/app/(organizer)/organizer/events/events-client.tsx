@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import type { EventWithParticipants } from '@/server/db/queries';
 import { fillPercent, formatEventDateTime, isPast } from '@/shared/format';
+import { getEventImageUrl } from '@/shared/event-images';
 import { Badge, Progress } from '@/components/ui/badge';
 import { Button, ButtonLink } from '@/components/ui/button';
 import { Table, THead, TH, TR, TD } from '@/components/ui/table';
@@ -250,60 +251,73 @@ export function OrganizerEventsClient({ events }: { events: EventWithParticipant
           {events.map((event) => {
             const percent = fillPercent(event.maxSeats, event.occupiedSeats);
             const activeParticipants = event.activeParticipants;
+            const imageUrl = getEventImageUrl(event);
 
             return (
               <div
                 key={event.id}
-                className="group rounded-3xl border border-slate-200/80 bg-white/95 p-5 shadow-xs hover:border-indigo-200 hover:shadow-md transition-all duration-200"
+                className="group rounded-3xl border border-slate-200/80 bg-white/95 p-4 sm:p-5 shadow-xs hover:border-indigo-200 hover:shadow-md transition-all duration-200"
               >
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                  {/* Информация о событии */}
-                  <div className="min-w-0 flex-1 space-y-2">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <Badge
-                        tone={
-                          event.status === 'published'
-                            ? 'success'
-                            : event.status === 'cancelled'
-                              ? 'danger'
-                              : 'neutral'
-                        }
-                        withDot
-                      >
-                        {event.status === 'published'
-                          ? 'Опубликовано'
-                          : event.status === 'cancelled'
-                            ? 'Отменено'
-                            : 'Черновик'}
-                      </Badge>
-
-                      <span className="inline-flex items-center gap-1 text-xs font-bold text-slate-700">
-                        <CalendarDays className="h-3.5 w-3.5 text-indigo-500" />
-                        {formatEventDateTime(event.startDate)}
-                      </span>
-
-                      {isPast(event.startDate) && (
-                        <span className="text-[11px] font-semibold text-slate-400">· Прошло</span>
-                      )}
+                  {/* Миниатюра фото + Информация о событии */}
+                  <div className="flex items-start gap-4 min-w-0 flex-1">
+                    <div className="relative h-16 w-16 sm:h-20 sm:w-20 shrink-0 overflow-hidden rounded-2xl border border-slate-200 bg-slate-900 shadow-2xs">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={imageUrl}
+                        alt={event.title}
+                        loading="lazy"
+                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      />
                     </div>
 
-                    <h3 className="truncate text-base sm:text-lg font-black tracking-tight text-slate-900 group-hover:text-indigo-600 transition-colors">
-                      {event.title}
-                    </h3>
+                    <div className="min-w-0 flex-1 space-y-1.5">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <Badge
+                          tone={
+                            event.status === 'published'
+                              ? 'success'
+                              : event.status === 'cancelled'
+                                ? 'danger'
+                                : 'neutral'
+                          }
+                          withDot
+                        >
+                          {event.status === 'published'
+                            ? 'Опубликовано'
+                            : event.status === 'cancelled'
+                              ? 'Отменено'
+                              : 'Черновик'}
+                        </Badge>
 
-                    <div className="flex flex-wrap items-center gap-4 text-xs text-slate-500">
-                      <span className="flex items-center gap-1.5 truncate max-w-xs">
-                        <MapPin className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
-                        <span className="truncate">{event.location}</span>
-                      </span>
-
-                      <div className="flex items-center gap-2">
-                        <div className="w-24">
-                          <Progress value={percent} />
-                        </div>
-                        <span className="font-bold text-slate-700 whitespace-nowrap">
-                          {event.occupiedSeats} / {event.maxSeats} ({percent}%)
+                        <span className="inline-flex items-center gap-1 text-xs font-bold text-slate-700">
+                          <CalendarDays className="h-3.5 w-3.5 text-indigo-500" />
+                          {formatEventDateTime(event.startDate)}
                         </span>
+
+                        {isPast(event.startDate) && (
+                          <span className="text-[11px] font-semibold text-slate-400">· Прошло</span>
+                        )}
+                      </div>
+
+                      <h3 className="truncate text-base sm:text-lg font-black tracking-tight text-slate-900 group-hover:text-indigo-600 transition-colors">
+                        {event.title}
+                      </h3>
+
+                      <div className="flex flex-wrap items-center gap-4 text-xs text-slate-500">
+                        <span className="flex items-center gap-1.5 truncate max-w-xs">
+                          <MapPin className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
+                          <span className="truncate">{event.location}</span>
+                        </span>
+
+                        <div className="flex items-center gap-2">
+                          <div className="w-24">
+                            <Progress value={percent} />
+                          </div>
+                          <span className="font-bold text-slate-700 whitespace-nowrap">
+                            {event.occupiedSeats} / {event.maxSeats} ({percent}%)
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -332,11 +346,20 @@ export function OrganizerEventsClient({ events }: { events: EventWithParticipant
               {events.map((event) => {
                 const percent = fillPercent(event.maxSeats, event.occupiedSeats);
                 const activeParticipants = event.activeParticipants;
+                const imageUrl = getEventImageUrl(event);
                 return (
                   <TR key={event.id} className="hover:bg-slate-50/60 transition-colors">
-                    <TD className="max-w-[240px] py-3.5">
-                      <p className="truncate font-bold text-slate-900">{event.title}</p>
-                      <p className="truncate text-xs text-slate-500 mt-0.5">{event.location}</p>
+                    <TD className="max-w-[280px] py-3.5">
+                      <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 shrink-0 overflow-hidden rounded-xl border border-slate-200 bg-slate-900 shadow-2xs">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={imageUrl} alt={event.title} className="h-full w-full object-cover" loading="lazy" />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="truncate font-bold text-slate-900">{event.title}</p>
+                          <p className="truncate text-xs text-slate-500 mt-0.5">{event.location}</p>
+                        </div>
+                      </div>
                     </TD>
                     <TD className="whitespace-nowrap py-3.5 text-xs font-semibold text-slate-700">
                       {formatEventDateTime(event.startDate)}

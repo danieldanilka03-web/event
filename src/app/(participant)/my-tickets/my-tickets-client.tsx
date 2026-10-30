@@ -7,6 +7,7 @@ import { CalendarDays, MapPin, Ticket, Ban, Armchair, Sparkles } from 'lucide-re
 import type { TicketRow } from '@/server/db/queries';
 import { formatEventDate, formatEventTime, isPast } from '@/shared/format';
 import { CATEGORY_GRADIENTS, CATEGORY_STYLES, type Category } from '@/shared/constants';
+import { getEventImageUrl } from '@/shared/event-images';
 import { Badge } from '@/components/ui/badge';
 import { Button, ButtonLink } from '@/components/ui/button';
 import { ConfirmDialog, EmptyState, Tabs } from '@/components/ui/dialog';
@@ -108,48 +109,63 @@ export function MyTicketsClient({ tickets }: { tickets: TicketRow[] }) {
             const gradient = CATEGORY_GRADIENTS[t.category as Category] ?? CATEGORY_GRADIENTS['Другое'];
             const catStyle = CATEGORY_STYLES[t.category as Category] ?? CATEGORY_STYLES['Другое'];
 
+            const imageUrl = getEventImageUrl({ imageUrl: t.imageUrl, category: t.category, id: t.eventId });
+
             return (
               <li
                 key={t.id}
-                className="group relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white/95 p-6 shadow-xs transition-all duration-200 hover:shadow-lg hover:border-indigo-200"
+                className="group relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white/95 p-5 sm:p-6 shadow-xs transition-all duration-200 hover:shadow-lg hover:border-indigo-200"
               >
                 {/* Цветная полоска категории слева */}
                 <div className={`absolute left-0 top-0 bottom-0 w-2 bg-gradient-to-b ${gradient}`} />
 
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between pl-2">
-                  <div className="min-w-0 space-y-1.5">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold ${catStyle.bg} ${catStyle.text} border ${catStyle.border}`}>
-                        <Sparkles className="h-3 w-3" />
-                        {t.category}
-                      </span>
-
-                      {t.eventStatus === 'cancelled' && <Badge tone="danger">Мероприятие отменено</Badge>}
-                      {t.status === 'cancelled' && t.eventStatus !== 'cancelled' && (
-                        <Badge tone="neutral">Запись отменена</Badge>
-                      )}
+                  <div className="flex items-start gap-4 min-w-0 flex-1">
+                    {/* Миниатюра фото события */}
+                    <div className="relative h-16 w-16 sm:h-20 sm:w-20 shrink-0 overflow-hidden rounded-2xl border border-slate-200 bg-slate-900 shadow-2xs">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={imageUrl}
+                        alt={t.title}
+                        loading="lazy"
+                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      />
                     </div>
 
-                    <h3 className="truncate text-lg font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">
-                      {t.title}
-                    </h3>
+                    <div className="min-w-0 flex-1 space-y-1.5">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold ${catStyle.bg} ${catStyle.text} border ${catStyle.border}`}>
+                          <Sparkles className="h-3 w-3" />
+                          {t.category}
+                        </span>
 
-                    {t.rowLabel && t.seatNumber !== null && (
-                      <div className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-50 px-2.5 py-1 text-xs font-bold text-indigo-700 border border-indigo-100">
-                        <Armchair className="h-3.5 w-3.5 text-indigo-600" aria-hidden />
-                        Ряд {t.rowLabel}, место {t.seatNumber}
+                        {t.eventStatus === 'cancelled' && <Badge tone="danger">Мероприятие отменено</Badge>}
+                        {t.status === 'cancelled' && t.eventStatus !== 'cancelled' && (
+                          <Badge tone="neutral">Запись отменена</Badge>
+                        )}
                       </div>
-                    )}
 
-                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-500 pt-1">
-                      <span className="inline-flex items-center gap-1.5 font-medium text-slate-700">
-                        <CalendarDays className="h-3.5 w-3.5 text-indigo-500" aria-hidden />
-                        {formatEventDate(t.startDate)}, {formatEventTime(t.startDate)}
-                      </span>
-                      <span className="inline-flex items-center gap-1.5">
-                        <MapPin className="h-3.5 w-3.5 text-emerald-500" aria-hidden />
-                        {t.location}
-                      </span>
+                      <h3 className="truncate text-lg font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">
+                        {t.title}
+                      </h3>
+
+                      {t.rowLabel && t.seatNumber !== null && (
+                        <div className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-50 px-2.5 py-1 text-xs font-bold text-indigo-700 border border-indigo-100">
+                          <Armchair className="h-3.5 w-3.5 text-indigo-600" aria-hidden />
+                          Ряд {t.rowLabel}, место {t.seatNumber}
+                        </div>
+                      )}
+
+                      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-500 pt-0.5">
+                        <span className="inline-flex items-center gap-1.5 font-medium text-slate-700">
+                          <CalendarDays className="h-3.5 w-3.5 text-indigo-500" aria-hidden />
+                          {formatEventDate(t.startDate)}, {formatEventTime(t.startDate)}
+                        </span>
+                        <span className="inline-flex items-center gap-1.5">
+                          <MapPin className="h-3.5 w-3.5 text-emerald-500" aria-hidden />
+                          {t.location}
+                        </span>
+                      </div>
                     </div>
                   </div>
 

@@ -30,6 +30,7 @@ function parseEventForm(formData: FormData) {
     location: formData.get('location'),
     startDate: formData.get('startDate'),
     maxSeats: formData.get('maxSeats'),
+    imageUrl: formData.get('imageUrl') || null,
     fixedSeating: formData.get('fixedSeating') ?? 'off',
   });
 }
@@ -59,6 +60,7 @@ export async function createEventAction(
         location: data.location,
         startDate: fromLocalInputValue(data.startDate),
         maxSeats: data.maxSeats,
+        imageUrl: data.imageUrl || null,
         status: 'draft',
         layoutRows: layout?.rows ?? null,
         seatsPerRow: layout?.seatsPerRow ?? null,
@@ -142,6 +144,7 @@ export async function updateEventAction(
       location: data.location,
       startDate: newStartDate,
       maxSeats: data.maxSeats,
+      imageUrl: data.imageUrl || null,
     })
     .where(eq(events.id, existing.id));
 

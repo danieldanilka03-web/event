@@ -3,6 +3,7 @@ import { CalendarDays, MapPin, ArrowRight, Sparkles } from 'lucide-react';
 import type { EventWithMeta } from '@/server/db/queries';
 import { CATEGORY_GRADIENTS, type Category } from '@/shared/constants';
 import { formatEventDate, formatEventTime, seatsInfo } from '@/shared/format';
+import { getEventImageUrl } from '@/shared/event-images';
 import { Badge } from '@/components/ui/badge';
 
 function getMonthAndDay(date: Date) {
@@ -14,35 +15,34 @@ function getMonthAndDay(date: Date) {
 
 export function EventCard({ event }: { event: EventWithMeta }) {
   const seats = seatsInfo(event.maxSeats, event.occupiedSeats);
-  const gradient = CATEGORY_GRADIENTS[event.category as Category] ?? CATEGORY_GRADIENTS['Другое'];
   const { day, month } = getMonthAndDay(event.startDate);
+  const imageUrl = getEventImageUrl(event);
 
   return (
-    <article className="group relative flex h-full flex-col overflow-hidden rounded-3xl border border-slate-200/80 bg-white/95 shadow-xs transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl hover:shadow-indigo-500/10 hover:border-indigo-200">
-      {/* Шапка карточки / визуальный постер */}
-      <div className={`relative h-36 bg-gradient-to-br ${gradient} p-4 text-white overflow-hidden`}>
-        {/* Фоновый узор сетки */}
-        <div
-          className="absolute inset-0 opacity-20 mix-blend-overlay pointer-events-none"
-          style={{
-            backgroundImage:
-              'radial-gradient(circle at 15px 15px, white 2%, transparent 0%), radial-gradient(circle at 45px 45px, white 2%, transparent 0%)',
-            backgroundSize: '50px 50px',
-          }}
+    <article className="group relative flex h-full flex-col overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-xs transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-indigo-500/10 hover:border-indigo-200">
+      {/* Шапка карточки / визуальный постер с фото */}
+      <div className="relative h-44 w-full overflow-hidden bg-slate-900">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={imageUrl}
+          alt={event.title}
+          loading="lazy"
+          className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
         />
-        <div className="absolute -top-12 -right-12 h-36 w-36 rounded-full bg-white/15 blur-xl pointer-events-none" />
+        {/* Мягкий градиентный оверлей поверх фото для контраста */}
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-black/20 to-black/30 pointer-events-none" />
 
-        <div className="relative z-10 flex items-start justify-between gap-2">
+        <div className="absolute inset-0 p-3.5 flex items-start justify-between gap-2 z-10 pointer-events-none">
           {/* Дата-стикер (день + месяц) */}
-          <div className="flex flex-col items-center justify-center rounded-2xl bg-white/95 px-3 py-1.5 text-slate-900 shadow-md backdrop-blur-md">
+          <div className="flex flex-col items-center justify-center rounded-2xl bg-white/95 px-2.5 py-1 text-slate-900 shadow-lg backdrop-blur-md">
             <span className="text-[10px] font-black uppercase tracking-wider text-rose-600 leading-none">
               {month}
             </span>
-            <span className="text-lg font-black leading-none mt-0.5">{day}</span>
+            <span className="text-base font-black leading-none mt-0.5">{day}</span>
           </div>
 
           {/* Бейдж категории */}
-          <span className="inline-flex items-center gap-1 rounded-full bg-black/25 px-3 py-1 text-xs font-bold text-white backdrop-blur-md border border-white/20 shadow-xs">
+          <span className="inline-flex items-center gap-1 rounded-full bg-slate-900/60 backdrop-blur-md px-3 py-1 text-xs font-bold text-white border border-white/20 shadow-md">
             <Sparkles className="h-3 w-3 text-amber-300" />
             {event.category}
           </span>

@@ -57,6 +57,7 @@ export async function getCatalog(query: CatalogQuery): Promise<{
       layoutRows: events.layoutRows,
       seatsPerRow: events.seatsPerRow,
       status: events.status,
+      imageUrl: events.imageUrl,
       createdAt: events.createdAt,
       organizerName: users.fullName,
     })
@@ -91,6 +92,7 @@ export async function getEventById(id: string) {
       layoutRows: events.layoutRows,
       seatsPerRow: events.seatsPerRow,
       status: events.status,
+      imageUrl: events.imageUrl,
       createdAt: events.createdAt,
       organizerName: users.fullName,
     })
@@ -139,6 +141,7 @@ export type TicketRow = {
   eventStatus: 'draft' | 'published' | 'cancelled';
   maxSeats: number;
   occupiedSeats: number;
+  imageUrl: string | null;
   organizerName: string | null;
 };
 
@@ -158,6 +161,7 @@ export async function getUserTickets(userId: string): Promise<TicketRow[]> {
       eventStatus: events.status,
       maxSeats: events.maxSeats,
       occupiedSeats: events.occupiedSeats,
+      imageUrl: events.imageUrl,
       organizerName: users.fullName,
     })
     .from(registrations)
@@ -190,6 +194,7 @@ export async function getTicketById(registrationId: string): Promise<
       eventStatus: events.status,
       maxSeats: events.maxSeats,
       occupiedSeats: events.occupiedSeats,
+      imageUrl: events.imageUrl,
       organizerName: users.fullName,
     })
     .from(registrations)
@@ -231,6 +236,7 @@ export async function getOrganizerEvents(
       layoutRows: events.layoutRows,
       seatsPerRow: events.seatsPerRow,
       status: events.status,
+      imageUrl: events.imageUrl,
       createdAt: events.createdAt,
       organizerName: users.fullName,
       activeParticipants: sql<number>`(
@@ -355,6 +361,7 @@ export async function getAdminEvents(page: number) {
       status: events.status,
       maxSeats: events.maxSeats,
       occupiedSeats: events.occupiedSeats,
+      imageUrl: events.imageUrl,
       organizerName: users.fullName,
       organizerId: events.organizerId,
     })

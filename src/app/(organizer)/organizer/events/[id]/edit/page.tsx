@@ -32,6 +32,7 @@ export default async function EditEventPage({ params }: { params: Promise<{ id: 
           startDate: event.startDate,
           maxSeats: event.maxSeats,
           occupiedSeats: event.occupiedSeats,
+          imageUrl: event.imageUrl,
           hasLayout: event.layoutRows !== null,
         }}
       />

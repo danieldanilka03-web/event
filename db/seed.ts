@@ -5,6 +5,7 @@ import { drizzle } from 'drizzle-orm/node-postgres';
 import { eq, sql } from 'drizzle-orm';
 import { events, registrations, seats, seatHolds, users, type EventRow } from '@/server/db/schema';
 import { buildSeats, layoutForSeats } from '@/shared/hall';
+import { getEventImageUrl } from '@/shared/event-images';
 
 // Скрипт запускается через tsx, поэтому .env.local читаем вручную.
 for (const file of ['.env.local', '.env']) {
@@ -145,6 +146,7 @@ async function main() {
       startDate: past ? at(-(30 - i), 12) : at(i + 1, 12),
       maxSeats,
       status,
+      imageUrl: getEventImageUrl({ category, id: String(i) }),
     });
   }
 

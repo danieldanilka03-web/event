@@ -51,6 +51,7 @@ export const events = pgTable(
     maxSeats: integer('max_seats').notNull(),
     occupiedSeats: integer('occupied_seats').notNull().default(0),
     status: eventStatus('status').notNull().default('draft'),
+    imageUrl: text('image_url'),
     // Раскладка зала. Если null — фиксированной рассадки нет, работает только счётчик мест.
     layoutRows: integer('layout_rows'),
     seatsPerRow: integer('seats_per_row'),

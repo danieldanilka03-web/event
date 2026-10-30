@@ -40,6 +40,13 @@ export const eventSchema = z
       .int('Количество мест должно быть целым числом')
       .min(1, 'Минимум 1 место')
       .max(10000, 'Слишком много мест'),
+    imageUrl: z
+      .string()
+      .trim()
+      .max(5000000, 'Изображение слишком большое')
+      .optional()
+      .or(z.literal(''))
+      .nullable(),
     fixedSeating: z
       .union([z.literal('on'), z.literal('off'), z.boolean()])
       .transform((v) => v === true || v === 'on')
