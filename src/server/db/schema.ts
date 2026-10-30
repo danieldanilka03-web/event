@@ -81,6 +81,7 @@ export const registrations = pgTable(
     status: regStatus('status').notNull().default('active'),
     // Выбранное кресло; null для мероприятий без фиксированной рассадки.
     seatId: uuid('seat_id').references(() => seats.id, { onDelete: 'set null' }),
+    checkedInAt: timestamp('checked_in_at', { withTimezone: true }),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [

@@ -287,6 +287,7 @@ export async function getEventParticipants(eventId: string) {
     .select({
       id: registrations.id,
       status: registrations.status,
+      checkedInAt: registrations.checkedInAt,
       createdAt: registrations.createdAt,
       userId: users.id,
       fullName: users.fullName,
@@ -294,6 +295,7 @@ export async function getEventParticipants(eventId: string) {
       phone: users.phone,
       rowLabel: seats.rowLabel,
       seatNumber: seats.number,
+      seatCategory: seats.category,
     })
     .from(registrations)
     .innerJoin(users, eq(users.id, registrations.userId))

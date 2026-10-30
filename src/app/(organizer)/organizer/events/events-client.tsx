@@ -16,6 +16,7 @@ import {
   ExternalLink,
   LayoutGrid,
   List,
+  QrCode,
 } from 'lucide-react';
 import type { EventWithParticipants } from '@/server/db/queries';
 import { fillPercent, formatEventDateTime, isPast } from '@/shared/format';
@@ -114,6 +115,10 @@ function ActionMenu({
             <MoreVertical className="h-4 w-4" />
           </DropdownTrigger>
           <DropdownContent align="right">
+            <DropdownItem href={`/organizer/events/${event.id}/check-in`}>
+              <QrCode className="h-3.5 w-3.5 text-indigo-600" />
+              Контроль входа (QR)
+            </DropdownItem>
             <DropdownItem href={`/organizer/events/${event.id}/edit`}>
               <Pencil className="h-3.5 w-3.5 text-slate-500" />
               Редактировать

@@ -223,6 +223,74 @@ async function main() {
       record('Переключатель Карточки / Таблица работает', true);
     }
 
+    // --- ТЕСТ 3.1: Список участников, фильтры и статус Check-In ---
+    console.log('\n--- Проверка: Список участников, отметки входа и экспорт Excel ---');
+    // Выбираем мероприятие с участниками (не 0)
+    let partManageLink = await orgPage.locator('a[href*="/participants"]:not(:has-text("(0)"))').first().getAttribute('href').catch(() => null);
+    if (!partManageLink) {
+      partManageLink = await orgPage.locator('a[href*="/participants"]').first().getAttribute('href');
+    }
+    if (partManageLink) {
+      const eventIdMatch = partManageLink.match(/\/events\/([^\/]+)\/participants/);
+      const currentEventId = eventIdMatch ? eventIdMatch[1] : null;
+
+      await orgPage.goto(`${BASE}${partManageLink}`, { waitUntil: 'networkidle' });
+      record('Страница участников мероприятия открыта', true);
+      await capture(orgPage, '18_organizer_participants_checkin', true);
+
+      // Извлекаем реальный номер билета из таблицы участников этого мероприятия
+      const ticketBadge = orgPage.locator('span.font-mono').first();
+      const testTicketCode = ((await ticketBadge.textContent({ timeout: 3000 }).catch(() => null)) || '').trim();
+      console.log(`    ℹ Найден билет для теста входа: [${testTicketCode}]`);
+
+      // Проверка API экспорта в Excel / CSV
+      if (currentEventId) {
+        const exportRes = await orgCtx.request.get(`${BASE}/api/events/${currentEventId}/export`);
+        record('API экспорта в Excel (CSV) отвечает 200 OK', exportRes.ok());
+        const exportText = await exportRes.text();
+        record('CSV содержит UTF-8 BOM для корректного открытия в Excel', exportText.charCodeAt(0) === 0xFEFF);
+        record('CSV содержит заголовки таблицы', exportText.includes('Номер билета') && exportText.includes('ФИО'));
+
+        // --- ТЕСТ 3.2: QR-станция контроля на входе (Check-In) ---
+        console.log('\n--- Проверка: QR-сканер контроля на входе ---');
+        await orgPage.goto(`${BASE}/organizer/events/${currentEventId}/check-in`, { waitUntil: 'networkidle' });
+        record('Экран QR-сканера открыт', true);
+
+        // Получаем активный номер билета из списка участников
+        const codeElement = orgPage.locator('input#ticket-code-input');
+        const hasCodeInput = (await codeElement.count()) > 0;
+        record('Поле ввода/сканирования штрихкода отображается и доступно', hasCodeInput);
+
+        if (hasCodeInput && testTicketCode) {
+          // Вводим реальный код билета в поле сканера
+          await codeElement.fill(testTicketCode);
+          await orgPage.locator('button[type="submit"]:has-text("Подтвердить вход")').click();
+          await orgPage.waitForTimeout(1000);
+
+          const bannerText = await orgPage.textContent('body');
+          const isSuccessOrWarning =
+            bannerText.includes('ДОСТУП РАЗРЕШЁН') ||
+            bannerText.includes('ПОВТОРНЫЙ ПРОХОД') ||
+            bannerText.includes('Вход подтверждён');
+
+          record(`Сканирование билета [${testTicketCode}] подтверждено`, isSuccessOrWarning);
+          await capture(orgPage, '19_organizer_checkin_scanner_success');
+
+          // Повторный ввод того же кода для проверки защиты от повторного прохода
+          await codeElement.fill(testTicketCode);
+          await orgPage.locator('button[type="submit"]:has-text("Подтвердить вход")').click();
+          await orgPage.waitForTimeout(1000);
+
+          const duplicateWarning = await orgPage.textContent('body');
+          record(
+            'Защита от повторного прохода (предупреждение о дубликате билета)',
+            duplicateWarning.includes('ПОВТОРНЫЙ ПРОХОД') || duplicateWarning.includes('уже был использован ранее')
+          );
+          await capture(orgPage, '20_organizer_checkin_duplicate_warning');
+        }
+      }
+    }
+
     // Создание события
     await orgPage.goto(`${BASE}/organizer/events/new`, { waitUntil: 'networkidle' });
     record('Страница создания мероприятия открыта', true);
