@@ -261,6 +261,7 @@ export async function getOrganizerMetrics(organizerId: string) {
 
   const [seats] = await db
     .select({
+      totalEvents: count(),
       free: sql<number>`coalesce(sum(max_seats - occupied_seats), 0)::int`,
       fill: sql<number>`coalesce(round(avg(case when max_seats > 0 then (occupied_seats::numeric / max_seats) * 100 end)), 0)::int`,
     })
@@ -268,6 +269,7 @@ export async function getOrganizerMetrics(organizerId: string) {
     .where(eq(events.organizerId, organizerId));
 
   return {
+    totalEvents: seats?.totalEvents ?? 0,
     registrations: totals?.registrations ?? 0,
     freeSeats: seats?.free ?? 0,
     fillPercent: seats?.fill ?? 0,

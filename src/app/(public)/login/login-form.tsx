@@ -4,7 +4,7 @@ import * as React from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useFormStatus } from 'react-dom';
-import { ShieldAlert, Sparkles, UserCheck, Briefcase } from 'lucide-react';
+import { ShieldAlert, Sparkles, UserCheck, Briefcase, Eye, EyeOff } from 'lucide-react';
 import { loginAction } from '@/server/actions/auth';
 import { safeRedirectPath } from '@/shared/utils';
 import { Button } from '@/components/ui/button';
@@ -28,6 +28,7 @@ export function LoginForm() {
   const next = safeRedirectPath(rawNext, '/my-tickets');
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
+  const [showPassword, setShowPassword] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = React.useState<Record<string, string>>({});
   const [pending, setPending] = React.useState(false);
@@ -68,41 +69,44 @@ export function LoginForm() {
         router.refresh();
       }}
     >
-      {/* Кнопки быстрого выбора роли для демонстрации / защиты диплома */}
-      <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 shadow-2xs">
-        <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 mb-2">
+      {/* Кнопки быстрого выбора роли для демонстрации возможностей платформы */}
+      <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-3 shadow-2xs">
+        <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 mb-2.5">
           <Sparkles className="h-3.5 w-3.5 text-amber-500" />
-          <span>Быстрый вход для демонстрации (тестовые роли):</span>
+          <span>Быстрый вход для тестирования ролей:</span>
         </div>
         <div className="grid grid-cols-3 gap-2">
           <button
             type="button"
             onClick={() => selectDemoUser('admin@example.com', 'Password123!')}
-            className="flex flex-col items-center justify-center rounded-lg border border-purple-200 bg-white p-2 text-xs font-medium text-purple-700 hover:bg-purple-50 hover:border-purple-300 transition shadow-2xs active:scale-95"
+            className="flex flex-col items-center justify-center rounded-xl border border-purple-200 bg-white p-2.5 text-xs font-semibold text-purple-700 hover:bg-purple-50 hover:border-purple-300 transition shadow-2xs active:scale-95"
             title="Администратор (доступ ко всем событиям, блокировка и роли пользователей)"
           >
             <ShieldAlert className="h-4 w-4 mb-1 text-purple-600" />
-            <span>Админ</span>
+            <span className="font-bold">Админ</span>
+            <span className="text-[10px] text-purple-500 font-normal mt-0.5">admin@…</span>
           </button>
 
           <button
             type="button"
             onClick={() => selectDemoUser('organizer1@example.com', 'Password123!')}
-            className="flex flex-col items-center justify-center rounded-lg border border-blue-200 bg-white p-2 text-xs font-medium text-blue-700 hover:bg-blue-50 hover:border-blue-300 transition shadow-2xs active:scale-95"
+            className="flex flex-col items-center justify-center rounded-xl border border-blue-200 bg-white p-2.5 text-xs font-semibold text-blue-700 hover:bg-blue-50 hover:border-blue-300 transition shadow-2xs active:scale-95"
             title="Организатор (свои мероприятия, схема зала, лист ожидания, участники)"
           >
             <Briefcase className="h-4 w-4 mb-1 text-blue-600" />
-            <span>Организатор</span>
+            <span className="font-bold">Организатор</span>
+            <span className="text-[10px] text-blue-500 font-normal mt-0.5">org1@…</span>
           </button>
 
           <button
             type="button"
             onClick={() => selectDemoUser('participant1@example.com', 'Password123!')}
-            className="flex flex-col items-center justify-center rounded-lg border border-emerald-200 bg-white p-2 text-xs font-medium text-emerald-700 hover:bg-emerald-50 hover:border-emerald-300 transition shadow-2xs active:scale-95"
+            className="flex flex-col items-center justify-center rounded-xl border border-emerald-200 bg-white p-2.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-50 hover:border-emerald-300 transition shadow-2xs active:scale-95"
             title="Участник (каталог, покупка билетов, выбор места, лист ожидания)"
           >
             <UserCheck className="h-4 w-4 mb-1 text-emerald-600" />
-            <span>Участник</span>
+            <span className="font-bold">Участник</span>
+            <span className="text-[10px] text-emerald-500 font-normal mt-0.5">user1@…</span>
           </button>
         </div>
       </div>
@@ -126,15 +130,26 @@ export function LoginForm() {
       </Field>
 
       <Field label="Пароль" htmlFor="password" error={fieldErrors.password}>
-        <Input
-          id="password"
-          name="password"
-          type="password"
-          autoComplete="current-password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
+        <div className="relative">
+          <Input
+            id="password"
+            name="password"
+            type={showPassword ? 'text' : 'password'}
+            autoComplete="current-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="pr-10"
+            required
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword((prev) => !prev)}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none"
+            aria-label={showPassword ? 'Скрыть пароль' : 'Показать пароль'}
+          >
+            {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+          </button>
+        </div>
       </Field>
 
       <Submit pending={pending} />

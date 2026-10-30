@@ -4,6 +4,7 @@ import * as React from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useFormStatus } from 'react-dom';
+import { Eye, EyeOff } from 'lucide-react';
 import { registerAction } from '@/server/actions/auth';
 import { safeRedirectPath } from '@/shared/utils';
 import { Button } from '@/components/ui/button';
@@ -25,6 +26,7 @@ export function RegisterForm() {
   const searchParams = useSearchParams();
   const rawNext = searchParams.get('next');
   const next = safeRedirectPath(rawNext, '/');
+  const [showPassword, setShowPassword] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = React.useState<Record<string, string>>({});
   const [pending, setPending] = React.useState(false);
@@ -73,14 +75,25 @@ export function RegisterForm() {
         error={fieldErrors.password}
         hint="Минимум 8 символов"
       >
-        <Input
-          id="password"
-          name="password"
-          type="password"
-          autoComplete="new-password"
-          minLength={8}
-          required
-        />
+        <div className="relative">
+          <Input
+            id="password"
+            name="password"
+            type={showPassword ? 'text' : 'password'}
+            autoComplete="new-password"
+            minLength={8}
+            className="pr-10"
+            required
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword((prev) => !prev)}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none"
+            aria-label={showPassword ? 'Скрыть пароль' : 'Показать пароль'}
+          >
+            {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+          </button>
+        </div>
       </Field>
 
       <Submit pending={pending} />

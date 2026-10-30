@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { Users, Armchair, Gauge } from 'lucide-react';
+import { Users, Armchair, Gauge, CalendarDays } from 'lucide-react';
 import { requireRole } from '@/server/auth/guards';
 import { getOrganizerEvents, getOrganizerMetrics } from '@/server/db/queries';
 import { DashboardShell, MetricCard } from '@/components/layout/dashboard-shell';
@@ -29,13 +29,22 @@ export default async function OrganizerDashboard() {
         </ButtonLink>
       }
     >
-      <div className="grid gap-4 sm:grid-cols-3">
-        <MetricCard icon={<Users className="h-5 w-5" />} value={metrics.registrations} label="Всего регистраций" />
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <MetricCard
+          icon={<CalendarDays className="h-5 w-5" />}
+          value={metrics.totalEvents}
+          label="Моих мероприятий"
+        />
+        <MetricCard
+          icon={<Users className="h-5 w-5" />}
+          value={metrics.registrations}
+          label="Всего регистраций"
+          tone="accent"
+        />
         <MetricCard
           icon={<Armchair className="h-5 w-5" />}
           value={metrics.freeSeats}
           label="Свободных мест"
-          tone="accent"
         />
         <MetricCard
           icon={<Gauge className="h-5 w-5" />}

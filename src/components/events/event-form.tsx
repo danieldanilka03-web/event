@@ -49,7 +49,7 @@ export function EventForm({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{mode === 'create' ? 'Новое мероприятие' : 'Редактирование мероприятия'}</CardTitle>
+        <CardTitle>{mode === 'create' ? 'Параметры и детали события' : 'Редактирование параметров события'}</CardTitle>
       </CardHeader>
       <CardContent>
         <form

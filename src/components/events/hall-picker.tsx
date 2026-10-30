@@ -434,6 +434,12 @@ function Legend() {
         Свободно
       </span>
       <span className="flex items-center gap-1.5">
+        <span className="relative flex h-3 w-3 items-center justify-center rounded border border-slate-300 bg-white shadow-2xs">
+          <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
+        </span>
+        VIP-место
+      </span>
+      <span className="flex items-center gap-1.5">
         <span className="h-3 w-3 rounded bg-indigo-600 shadow-2xs" />
         Выбрано вами
       </span>
