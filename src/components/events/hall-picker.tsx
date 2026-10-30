@@ -56,12 +56,81 @@ function pluralTickets(count: number): string {
   return `${count} билетов`;
 }
 
+type CategoryHallTheme = {
+  focusLabel: string;
+  subTitle: string;
+  lineColor: string;
+  gradStart: string;
+  gradEnd: string;
+  textColor: string;
+};
+
+const CATEGORY_HALL_THEMES: Record<string, CategoryHallTheme> = {
+  'Спорт': {
+    focusLabel: 'ПОЛЕ / АРЕНА СТАДИОНА',
+    subTitle: 'Схема трибуны (выберите до 5 мест)',
+    lineColor: '#10B981',
+    gradStart: 'rgba(16, 185, 129, 0.18)',
+    gradEnd: 'rgba(241, 245, 249, 0.9)',
+    textColor: 'fill-emerald-950',
+  },
+  'Конференции': {
+    focusLabel: 'ПРЕЗИДИУМ / ЭКРАН ДОКЛАДЧИКА',
+    subTitle: 'Схема конференц-зала (выберите до 5 мест)',
+    lineColor: '#6366F1',
+    gradStart: 'rgba(79, 70, 229, 0.18)',
+    gradEnd: 'rgba(241, 245, 249, 0.9)',
+    textColor: 'fill-indigo-950',
+  },
+  'Концерты': {
+    focusLabel: 'ГЛАВНАЯ СЦЕНА / МУЗЫКАНТЫ',
+    subTitle: 'Схема концертного зала (выберите до 5 мест)',
+    lineColor: '#EC4899',
+    gradStart: 'rgba(236, 72, 153, 0.18)',
+    gradEnd: 'rgba(241, 245, 249, 0.9)',
+    textColor: 'fill-pink-950',
+  },
+  'Мастер-классы': {
+    focusLabel: 'СТОЛ ВЕДУЩЕГО / ДЕМО-ЗОНА',
+    subTitle: 'Схема мест на воркшопе (выберите до 5 мест)',
+    lineColor: '#14B8A6',
+    gradStart: 'rgba(20, 184, 166, 0.18)',
+    gradEnd: 'rgba(241, 245, 249, 0.9)',
+    textColor: 'fill-teal-950',
+  },
+  'Выставки': {
+    focusLabel: 'ЦЕНТРАЛЬНАЯ ЭКСПОЗИЦИЯ',
+    subTitle: 'Схема выставочного пространства (выберите до 5 мест)',
+    lineColor: '#0EA5E9',
+    gradStart: 'rgba(14, 165, 233, 0.18)',
+    gradEnd: 'rgba(241, 245, 249, 0.9)',
+    textColor: 'fill-sky-950',
+  },
+  'Образование': {
+    focusLabel: 'ДОСКА / КАФЕДРА ПРЕПОДАВАТЕЛЯ',
+    subTitle: 'Схема учебной аудитории (выберите до 5 мест)',
+    lineColor: '#8B5CF6',
+    gradStart: 'rgba(139, 92, 246, 0.18)',
+    gradEnd: 'rgba(241, 245, 249, 0.9)',
+    textColor: 'fill-purple-950',
+  },
+  'Другое': {
+    focusLabel: 'ГЛАВНАЯ СЦЕНА / ЦЕНТР СОБЫТИЯ',
+    subTitle: 'Схема зала (выберите до 5 мест)',
+    lineColor: '#6366F1',
+    gradStart: 'rgba(79, 70, 229, 0.18)',
+    gradEnd: 'rgba(241, 245, 249, 0.9)',
+    textColor: 'fill-slate-900',
+  },
+};
+
 export function HallPicker({
   eventId,
   seats,
   isAuthenticated,
   isPast,
   isUnavailable,
+  category,
 }: {
   eventId: string;
   seats: SeatView[];
@@ -69,9 +138,11 @@ export function HallPicker({
   isRegistered?: boolean;
   isPast: boolean;
   isUnavailable: boolean;
+  category?: string;
 }) {
   const router = useRouter();
   const toast = useToast();
+  const theme = CATEGORY_HALL_THEMES[category ?? ''] ?? CATEGORY_HALL_THEMES['Другое'];
 
   // Оптимистичные статусы кресел для мгновенного отклика (0ms latency)
   const [optimisticMine, setOptimisticMine] = React.useState<Record<string, { expiresAt: string }>>({});
@@ -241,7 +312,7 @@ export function HallPicker({
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-          Схема зрительного зала (выберите до 5 мест)
+          {theme.subTitle}
         </p>
         <Legend />
       </div>
@@ -312,23 +383,23 @@ export function HallPicker({
           viewBox={`0 0 ${width} ${height}`}
           className="mx-auto h-auto w-full max-w-[560px]"
           role="group"
-          aria-label="Схема зала и выбор мест"
+          aria-label={`Схема рассадки: ${theme.focusLabel}`}
         >
           <defs>
-            <linearGradient id="stageGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor="#4F46E5" stopOpacity="0.12" />
-              <stop offset="100%" stopColor="#E2E8F0" stopOpacity="0.8" />
+            <linearGradient id="focusGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor={theme.gradStart} />
+              <stop offset="100%" stopColor={theme.gradEnd} />
             </linearGradient>
           </defs>
 
-          {/* Сцена */}
+          {/* Центральный фокус схемы (Поле / Сцена / Президиум / Экспозиция) */}
           <rect
             x={ROW_LABEL_W - 8}
             y={2}
             width={width - ROW_LABEL_W - 8}
             height={SCREEN_H - 12}
             rx={8}
-            fill="url(#stageGrad)"
+            fill="url(#focusGrad)"
             stroke="#CBD5E1"
             strokeWidth="1"
           />
@@ -337,18 +408,18 @@ export function HallPicker({
             y1={4}
             x2={width - 20}
             y2={4}
-            stroke="#6366F1"
-            strokeWidth="3"
+            stroke={theme.lineColor}
+            strokeWidth="3.5"
             strokeLinecap="round"
           />
           <text
             x={width / 2}
             y={SCREEN_H / 2 + 5}
             textAnchor="middle"
-            className="fill-indigo-950 font-bold"
+            className={`${theme.textColor} font-bold`}
             style={{ fontSize: 10, letterSpacing: '0.12em' }}
           >
-            СЦЕНА / ЭКРАН
+            {theme.focusLabel}
           </text>
 
           {rows.map(([label, list], rIndex) => {

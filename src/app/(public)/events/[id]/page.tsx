@@ -140,12 +140,24 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
             </div>
           </div>
 
-          {/* Интерактивная схема зала (если настроена) */}
+          {/* Интерактивная схема зала / трибуны / аудитории (если настроена) */}
           {event.layoutRows && (
             <section className="rounded-3xl border border-slate-200/80 bg-white/95 p-6 sm:p-8 shadow-xs">
               <div className="mb-4 flex items-center justify-between">
                 <div>
-                  <h2 className="text-lg font-black tracking-tight text-slate-900">Выбор места в зале</h2>
+                  <h2 className="text-lg font-black tracking-tight text-slate-900">
+                    {event.category === 'Спорт'
+                      ? 'Выбор места на трибуне'
+                      : event.category === 'Концерты'
+                        ? 'Выбор места в концертном зале'
+                        : event.category === 'Конференции'
+                          ? 'Выбор места в конференц-зале'
+                          : event.category === 'Мастер-классы'
+                            ? 'Выбор рабочего места на воркшопе'
+                            : event.category === 'Образование'
+                              ? 'Выбор места в аудитории'
+                              : 'Выбор места в зале'}
+                  </h2>
                   <p className="text-xs text-slate-500 mt-0.5">
                     Кликните на свободное место, чтобы забронировать его на 10 минут
                   </p>
@@ -157,6 +169,7 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
                 isAuthenticated={Boolean(user)}
                 isPast={past}
                 isUnavailable={isCancelled || event.status !== 'published'}
+                category={event.category}
               />
             </section>
           )}
