@@ -65,15 +65,17 @@ export function UserMenu({ name, role }: { name: string; role: 'participant' | '
       {open && (
         <div
           role="menu"
-          className="absolute right-0 mt-2 w-60 rounded-2xl border border-slate-200/80 bg-white p-1.5 shadow-xl animate-in fade-in zoom-in-95 duration-100 z-50"
+          className="absolute right-0 mt-2 w-64 rounded-2xl border border-slate-200/80 bg-white p-1.5 shadow-xl animate-in fade-in zoom-in-95 duration-100 z-50"
         >
-          <div className="px-3 py-2 border-b border-slate-100 mb-1">
-            <p className="text-xs font-medium text-slate-400">Роль в системе</p>
-            <div className="mt-1 flex items-center justify-between">
-              <span className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-semibold border ${roleStyles}`}>
+          <div className="px-3 py-2.5 border-b border-slate-100 mb-1">
+            <p className="text-sm font-bold text-slate-900 leading-tight truncate" title={name}>
+              {name}
+            </p>
+            <div className="mt-1.5 flex items-center justify-between gap-2">
+              <span className={`inline-flex items-center rounded-md px-2 py-0.5 text-2xs font-bold border ${roleStyles}`}>
                 {ROLE_LABEL[role]}
               </span>
-              <span className="text-xs text-slate-500 truncate max-w-[120px]">{name}</span>
+              <span className="text-2xs text-slate-400">Роль в системе</span>
             </div>
           </div>
 

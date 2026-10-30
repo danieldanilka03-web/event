@@ -115,41 +115,46 @@ export default async function TicketPage({ params }: { params: Promise<{ id: str
       {/* Плашка группового заказа (если куплено несколько мест) */}
       {totalTickets > 1 && (
         <div className="no-print mb-6 rounded-3xl border border-indigo-200/90 bg-indigo-50/80 p-4 sm:p-5 shadow-xs">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-indigo-600 text-white font-black text-xs shadow-2xs">
-                  {totalTickets}
-                </span>
-                <p className="text-sm font-bold text-indigo-950">
-                  В вашем заказе {pluralTickets(totalTickets)}:
-                </p>
-              </div>
-              <p className="mt-1 text-xs text-indigo-800/90 font-medium leading-relaxed">
-                У каждого места свой персональный QR-код. Вы можете переслать нужный билет друзьям или показать контролёру по очереди.
+          {/* Верхняя строка: Заголовок + Счётчик текущего билета */}
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-indigo-200/70 pb-3 mb-3">
+            <div className="flex items-center gap-2">
+              <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-indigo-600 text-white font-black text-xs shadow-2xs">
+                {totalTickets}
+              </span>
+              <p className="text-sm font-bold text-indigo-950">
+                В вашем заказе {pluralTickets(totalTickets)}:
               </p>
             </div>
-            {/* Быстрые кнопки переключения между билетами */}
-            <div className="flex flex-wrap items-center gap-1.5 shrink-0">
-              {siblingTickets.map((t, idx) => {
-                const isCurrent = t.id === ticket.id;
-                const seatLabel = t.rowLabel && t.seatNumber ? `Ряд ${t.rowLabel}, м.${t.seatNumber}` : `Билет №${idx + 1}`;
-                return (
-                  <Link
-                    key={t.id}
-                    href={`/tickets/${t.id}`}
-                    className={cn(
-                      'rounded-xl px-3 py-1.5 text-xs font-bold transition-all duration-150',
-                      isCurrent
-                        ? 'bg-indigo-600 text-white shadow-xs ring-2 ring-indigo-600 ring-offset-2'
-                        : 'bg-white text-slate-700 border border-slate-200/90 hover:bg-slate-100 hover:text-slate-950',
-                    )}
-                  >
-                    {isCurrent ? `✓ ${seatLabel}` : seatLabel}
-                  </Link>
-                );
-              })}
-            </div>
+            <span className="rounded-lg bg-indigo-100 px-2.5 py-1 text-xs font-bold text-indigo-700">
+              Билет {ticketNumber} из {totalTickets}
+            </span>
+          </div>
+
+          {/* Подсказка на всю ширину карточки */}
+          <p className="text-xs text-indigo-800/90 font-medium leading-relaxed mb-3">
+            У каждого места свой персональный QR-код. Выберите место ниже, чтобы открыть или распечатать его билет:
+          </p>
+
+          {/* Сетка мест во всю ширину */}
+          <div className="flex flex-wrap items-center gap-2">
+            {siblingTickets.map((t, idx) => {
+              const isCurrent = t.id === ticket.id;
+              const seatLabel = t.rowLabel && t.seatNumber ? `Ряд ${t.rowLabel}, м.${t.seatNumber}` : `Билет №${idx + 1}`;
+              return (
+                <Link
+                  key={t.id}
+                  href={`/tickets/${t.id}`}
+                  className={cn(
+                    'rounded-xl px-3 py-1.5 text-xs font-bold transition-all duration-150',
+                    isCurrent
+                      ? 'bg-indigo-600 text-white shadow-xs ring-2 ring-indigo-600 ring-offset-2'
+                      : 'bg-white text-slate-700 border border-slate-200/90 hover:bg-slate-100 hover:text-slate-950',
+                  )}
+                >
+                  {isCurrent ? `✓ ${seatLabel}` : seatLabel}
+                </Link>
+              );
+            })}
           </div>
         </div>
       )}
