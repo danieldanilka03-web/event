@@ -154,12 +154,13 @@ async function main() {
           record('Мульти-выбор: выделено 2 места и видна плашка заказа', orderBanner > 0);
           await capture(partPage, '03_event_hall_picker_multi_seat');
 
-          // Нажимаем отпустить всё, чтобы очистить бронь
-          const releaseBtn = partPage.locator('button:has-text("Отпустить всё")');
-          if ((await releaseBtn.count()) > 0) {
-            await releaseBtn.click();
-            await partPage.waitForTimeout(500);
-            record('Кнопка «Отпустить всё» освобождает места', true);
+          // Нажимаем «Оформить билеты», чтобы зафиксировать заказ нескольких мест
+          const confirmBtn = partPage.locator('button:has-text("Оформить")');
+          if ((await confirmBtn.count()) > 0) {
+            await confirmBtn.click();
+            await partPage.waitForURL(/\/tickets\//, { timeout: 15000 });
+            record('Мульти-заказ успешно оформлен и открыт билет', true);
+            await capture(partPage, '07_ticket_qr_pass');
           }
         }
       }
