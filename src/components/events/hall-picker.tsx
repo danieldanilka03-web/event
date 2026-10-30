@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { useRouter } from 'next/navigation';
-import { Clock, ShieldCheck, Check, X, Armchair } from 'lucide-react';
+import { Clock, ShieldCheck, Check, X } from 'lucide-react';
 import type { SeatView } from '@/server/db/halls';
 import { HOLD_TTL_MINUTES } from '@/shared/hall';
 import { holdSeatAction, registerForEventAction, releaseHoldAction } from '@/server/actions/registrations';
@@ -73,7 +73,28 @@ export function HallPicker({
   const router = useRouter();
   const toast = useToast();
 
-  const mineSeats = React.useMemo(() => seats.filter((s) => s.status === 'mine'), [seats]);
+  // Оптимистичные статусы кресел для мгновенного отклика (0ms latency)
+  const [optimisticMine, setOptimisticMine] = React.useState<Record<string, { expiresAt: string }>>({});
+  const [optimisticReleased, setOptimisticReleased] = React.useState<Set<string>>(new Set());
+
+  // Синхронизируем с props от сервера
+  const effectiveSeats = React.useMemo(() => {
+    return seats.map((s) => {
+      if (optimisticReleased.has(s.id)) {
+        return { ...s, status: 'free' as const, holdExpiresAt: null };
+      }
+      if (optimisticMine[s.id]) {
+        return {
+          ...s,
+          status: 'mine' as const,
+          holdExpiresAt: optimisticMine[s.id].expiresAt,
+        };
+      }
+      return s;
+    });
+  }, [seats, optimisticMine, optimisticReleased]);
+
+  const mineSeats = React.useMemo(() => effectiveSeats.filter((s) => s.status === 'mine'), [effectiveSeats]);
   const [now, setNow] = React.useState<number>(() => Date.now());
   const [busy, setBusy] = React.useState(false);
 
@@ -83,7 +104,7 @@ export function HallPicker({
     const timestamps = mineSeats
       .map((s) => (s.holdExpiresAt ? new Date(s.holdExpiresAt).getTime() : null))
       .filter((t): t is number => t !== null);
-    return timestamps.length > 0 ? Math.min(...timestamps) : null;
+    return timestamps.length > 0 ? Math.min(...timestamps) : Date.now() + HOLD_TTL_MINUTES * 60 * 1000;
   }, [mineSeats]);
 
   const disabled = isPast || isUnavailable;
@@ -95,6 +116,8 @@ export function HallPicker({
       setNow(current);
       if (current >= earliestExpiry) {
         toast('Время брони части мест истекло', 'danger');
+        setOptimisticMine({});
+        setOptimisticReleased(new Set());
         router.refresh();
       }
     }, 1000);
@@ -102,7 +125,7 @@ export function HallPicker({
   }, [earliestExpiry, router, toast]);
 
   const rowsMap = new Map<string, SeatView[]>();
-  for (const seat of seats) {
+  for (const seat of effectiveSeats) {
     const arr = rowsMap.get(seat.rowLabel) ?? [];
     arr.push(seat);
     rowsMap.set(seat.rowLabel, arr);
@@ -124,6 +147,14 @@ export function HallPicker({
 
     // Если место уже забронировано мной — повторный клик снимает с него бронь (toggle off)
     if (seat.status === 'mine') {
+      // Оптимистично освобождаем
+      setOptimisticReleased((prev) => new Set(prev).add(seat.id));
+      setOptimisticMine((prev) => {
+        const copy = { ...prev };
+        delete copy[seat.id];
+        return copy;
+      });
+
       setBusy(true);
       await releaseHoldAction(null, { eventId, seatId: seat.id });
       setBusy(false);
@@ -147,11 +178,26 @@ export function HallPicker({
       return;
     }
 
+    // Оптимистично бронируем на клиенте сразу
+    const expiry = new Date(Date.now() + HOLD_TTL_MINUTES * 60 * 1000).toISOString();
+    setOptimisticMine((prev) => ({ ...prev, [seat.id]: { expiresAt: expiry } }));
+    setOptimisticReleased((prev) => {
+      const copy = new Set(prev);
+      copy.delete(seat.id);
+      return copy;
+    });
+
     setBusy(true);
     const result = await holdSeatAction(null, { eventId, seatId: seat.id });
     setBusy(false);
 
     if (!result.ok) {
+      // Откатываем оптимистичный статус при ошибке
+      setOptimisticMine((prev) => {
+        const copy = { ...prev };
+        delete copy[seat.id];
+        return copy;
+      });
       toast(result.error, 'danger');
       router.refresh();
       return;
@@ -173,11 +219,15 @@ export function HallPicker({
       return;
     }
     toast(`Успешно оформлено: ${pluralTickets(mineSeats.length)}!`);
+    setOptimisticMine({});
+    setOptimisticReleased(new Set());
     router.push(`/tickets/${result.data.registrationId}`);
     router.refresh();
   }
 
   async function releaseAll() {
+    setOptimisticMine({});
+    setOptimisticReleased(new Set(mineSeats.map((s) => s.id)));
     setBusy(true);
     await releaseHoldAction(null, { eventId });
     setBusy(false);
@@ -185,7 +235,7 @@ export function HallPicker({
     router.refresh();
   }
 
-  const remaining = earliestExpiry ? earliestExpiry - now : 0;
+  const remaining = earliestExpiry ? Math.max(0, earliestExpiry - now) : 0;
 
   return (
     <div className="space-y-4">
@@ -196,7 +246,7 @@ export function HallPicker({
         <Legend />
       </div>
 
-      {mineSeats.length > 0 && earliestExpiry && (
+      {mineSeats.length > 0 && (
         <div
           className={cn(
             'flex flex-wrap items-center justify-between gap-4 rounded-3xl border p-4 shadow-md transition-all animate-in fade-in zoom-in-95 duration-200',
