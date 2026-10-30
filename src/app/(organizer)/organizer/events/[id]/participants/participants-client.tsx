@@ -14,6 +14,7 @@ import {
   Armchair,
   Filter,
   Check,
+  RotateCcw,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button, ButtonLink } from '@/components/ui/button';
@@ -274,17 +275,16 @@ export function ParticipantsClient({
           </p>
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-2xl border border-slate-200/80 bg-white shadow-2xs">
-          <Table className="min-w-[920px]">
+        <div className="rounded-2xl border border-slate-200/80 bg-white shadow-2xs overflow-hidden">
+          <Table className="w-full">
             <THead>
-              <TH className="w-12">№</TH>
-              <TH className="min-w-[220px]">Участник</TH>
-              <TH className="min-w-[180px]">Email / Телефон</TH>
-              {hasLayout && <TH className="min-w-[140px]">Место в зале</TH>}
-              <TH className="min-w-[160px]">Контроль входа (КПП)</TH>
-              <TH className="min-w-[110px]">Статус</TH>
-              <TH className="min-w-[140px]">Билет ID</TH>
-              <TH className="no-print min-w-[120px] text-right">Отметка</TH>
+              <TH className="w-10 text-center px-2 py-3 text-xs">№</TH>
+              <TH className="min-w-[160px] px-3 py-3">Участник</TH>
+              <TH className="min-w-[150px] px-3 py-3">Email / Телефон</TH>
+              {hasLayout && <TH className="min-w-[110px] px-3 py-3">Место в зале</TH>}
+              <TH className="min-w-[130px] px-3 py-3">Контроль (КПП)</TH>
+              <TH className="w-24 px-3 py-3">Билет ID</TH>
+              <TH className="no-print w-28 text-right px-3 py-3">Действие</TH>
             </THead>
             <tbody className="divide-y divide-slate-100">
               {filtered.map((p, index) => {
@@ -298,9 +298,9 @@ export function ParticipantsClient({
                       isChecked ? 'bg-emerald-50/30 hover:bg-emerald-50/50' : 'hover:bg-slate-50/60'
                     }`}
                   >
-                    <TD className="text-xs text-slate-400 font-mono py-3">{index + 1}</TD>
+                    <TD className="text-xs text-slate-400 font-mono py-3 text-center px-2">{index + 1}</TD>
 
-                    <TD className="py-3">
+                    <TD className="py-3 px-3">
                       <div className="flex items-center gap-2.5">
                         <span
                           className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg font-bold text-xs border ${
@@ -311,25 +311,27 @@ export function ParticipantsClient({
                         >
                           {initials(p.fullName)}
                         </span>
-                        <div>
-                          <p className="font-bold text-slate-900 leading-tight">{p.fullName}</p>
-                          <p className="text-[11px] text-slate-400 leading-tight mt-0.5">
+                        <div className="min-w-0">
+                          <p className="font-bold text-slate-900 leading-tight text-xs sm:text-sm truncate">
+                            {p.fullName}
+                          </p>
+                          <p className="text-[11px] text-slate-400 leading-tight mt-0.5 whitespace-nowrap">
                             Запись: {formatEventDateTime(p.createdAt)}
                           </p>
                         </div>
                       </div>
                     </TD>
 
-                    <TD className="text-xs text-slate-600 py-3">
-                      <p className="font-medium">{p.email}</p>
-                      <p className="text-slate-400 mt-0.5">{p.phone ?? '—'}</p>
+                    <TD className="text-xs text-slate-600 py-3 px-3">
+                      <p className="font-medium truncate">{p.email}</p>
+                      <p className="text-slate-400 mt-0.5 text-2xs">{p.phone ?? '—'}</p>
                     </TD>
 
                     {hasLayout && (
-                      <TD className="text-xs py-3">
+                      <TD className="text-xs py-3 px-3">
                         {p.rowLabel && p.seatNumber !== null ? (
                           <span
-                            className={`inline-flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-bold border ${
+                            className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-bold border whitespace-nowrap ${
                               p.seatCategory === 'vip'
                                 ? 'bg-amber-50 text-amber-900 border-amber-200'
                                 : 'bg-indigo-50 text-indigo-800 border-indigo-100'
@@ -346,59 +348,57 @@ export function ParticipantsClient({
                     )}
 
                     {/* Колонка контроля входа */}
-                    <TD className="py-3 text-xs">
+                    <TD className="py-3 px-3 text-xs">
                       {p.status === 'cancelled' ? (
-                        <span className="text-slate-400 italic">Отменён</span>
+                        <span className="inline-flex items-center gap-1 rounded-md bg-rose-50 px-2 py-0.5 text-2xs font-bold text-rose-700 border border-rose-200">
+                          Отменён
+                        </span>
                       ) : isChecked ? (
                         <div className="space-y-0.5">
-                          <span className="inline-flex items-center gap-1 rounded-md bg-emerald-100/80 px-2 py-0.5 text-xs font-bold text-emerald-900 border border-emerald-200">
-                            <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
-                            Прошёл контроль
+                          <span className="inline-flex items-center gap-1 rounded-md bg-emerald-100/80 px-2 py-0.5 text-2xs font-bold text-emerald-900 border border-emerald-200 whitespace-nowrap">
+                            <CheckCircle2 className="h-3 w-3 text-emerald-600" />
+                            Прошёл
                           </span>
-                          <p className="text-[11px] text-emerald-700/80 font-medium pl-0.5">
-                            Вход: {formatEventTime(p.checkedInAt!)}
+                          <p className="text-[10px] text-emerald-700 font-medium pl-0.5 whitespace-nowrap">
+                            {formatEventTime(p.checkedInAt!)}
                           </p>
                         </div>
                       ) : (
-                        <span className="inline-flex items-center gap-1 rounded-md bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-600 border border-slate-200">
+                        <span className="inline-flex items-center gap-1 rounded-md bg-slate-100 px-2 py-0.5 text-2xs font-semibold text-slate-600 border border-slate-200 whitespace-nowrap">
                           <Clock className="h-3 w-3 text-slate-400" />
                           Ожидается
                         </span>
                       )}
                     </TD>
 
-                    <TD className="py-3">
-                      <Badge tone={p.status === 'active' ? 'success' : 'neutral'}>
-                        {p.status === 'active' ? 'Активна' : 'Отменена'}
-                      </Badge>
-                    </TD>
-
-                    <TD className="py-3">
-                      <span className="font-mono text-xs font-bold text-slate-600 bg-slate-50 px-2 py-1 rounded border border-slate-200">
+                    <TD className="py-3 px-3">
+                      <span className="font-mono text-xs font-bold text-slate-600 bg-slate-50 px-2 py-1 rounded border border-slate-200 whitespace-nowrap">
                         {shortId(p.id)}
                       </span>
                     </TD>
 
-                    <TD className="no-print py-3 text-right">
+                    <TD className="no-print py-3 text-right px-3">
                       {p.status === 'active' && (
                         <Button
                           size="sm"
                           variant={isChecked ? 'outline' : 'default'}
                           disabled={isBusy}
                           onClick={() => handleToggleCheckIn(p)}
-                          className={`rounded-xl text-xs font-bold ${
+                          className={`rounded-xl text-xs font-bold whitespace-nowrap shrink-0 transition-all ${
                             isChecked
-                              ? 'text-slate-600 hover:text-rose-600 hover:border-rose-300'
-                              : 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-2xs'
+                              ? 'text-slate-600 hover:text-rose-600 hover:border-rose-300 h-8 px-2.5'
+                              : 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-2xs h-8 px-3'
                           }`}
                         >
                           {isBusy ? (
                             '...'
                           ) : isChecked ? (
-                            'Снять отметку'
+                            <>
+                              <RotateCcw className="h-3 w-3 mr-1" /> Снять
+                            </>
                           ) : (
                             <>
-                              <Check className="h-3.5 w-3.5 mr-1" /> Отметить вход
+                              <Check className="h-3.5 w-3.5 mr-1" /> Отметить
                             </>
                           )}
                         </Button>
